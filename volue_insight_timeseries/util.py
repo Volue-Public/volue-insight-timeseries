@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import warnings
 from past.types import basestring
+
 try:
     from urllib.parse import quote_plus
 except ImportError:
@@ -19,44 +20,44 @@ from zoneinfo._common import ZoneInfoNotFoundError
 
 
 # Curve types
-TIME_SERIES = 'TIME_SERIES'
-TAGGED = 'TAGGED'
-INSTANCES = 'INSTANCES'
-TAGGED_INSTANCES = 'TAGGED_INSTANCES'
+TIME_SERIES = "TIME_SERIES"
+TAGGED = "TAGGED"
+INSTANCES = "INSTANCES"
+TAGGED_INSTANCES = "TAGGED_INSTANCES"
 
 
 # Frequency mapping from TS to Pandas
 _TS_FREQ_TABLE = {
-    'Y': 'YS',
-    'S': '2QS',
-    'Q': 'QS',
-    'M': 'MS',
-    'W': 'W-MON',
-    'H12': '12h',
-    'H6': '6h',
-    'H3': '3h',
-    'MIN30': '30min',
-    'MIN15': '15min',
-    'MIN5': '5min',
-    'MIN': 'min',
-    'D': 'D',
+    "Y": "YS",
+    "S": "2QS",
+    "Q": "QS",
+    "M": "MS",
+    "W": "W-MON",
+    "H12": "12h",
+    "H6": "6h",
+    "H3": "3h",
+    "MIN30": "30min",
+    "MIN15": "15min",
+    "MIN5": "5min",
+    "MIN": "min",
+    "D": "D",
 }
 
 # Mapping from various versions of Pandas to TS is built from map above,
 # with some additions to support older versions of pandas
 _PANDAS_FREQ_TABLE = {
-    'YS-JAN': 'Y',
-    'AS-JAN': 'Y',
-    'AS': 'Y',
-    '2QS-JAN': 'S',
-    'QS-JAN': 'Q',
-    '12H': 'H12',
-    '6H': 'H6',
-    '3H': 'H3',
-    '30T': 'MIN30',
-    '15T': 'MIN15',
-    '5T': 'MIN5',
-    'T': 'MIN',
+    "YS-JAN": "Y",
+    "AS-JAN": "Y",
+    "AS": "Y",
+    "2QS-JAN": "S",
+    "QS-JAN": "Q",
+    "12H": "H12",
+    "6H": "H6",
+    "3H": "H3",
+    "30T": "MIN30",
+    "15T": "MIN15",
+    "5T": "MIN5",
+    "T": "MIN",
 }
 for ts_freq, pandas_freq in _TS_FREQ_TABLE.items():
     _PANDAS_FREQ_TABLE[pandas_freq.upper()] = ts_freq
@@ -70,8 +71,10 @@ class TS(object):
     """
     A class to hold a basic time series.
     """
-    def __init__(self, id=None, name=None, frequency=None, time_zone=None, tag=None, issue_date=None,
-                 curve_type=None, points=None, input_dict=None):
+
+    def __init__(
+        self, id=None, name=None, frequency=None, time_zone=None, tag=None, issue_date=None, curve_type=None, points=None, input_dict=None
+    ):
         self.id = id
         self.name = name
         self.frequency = frequency
@@ -89,19 +92,19 @@ class TS(object):
         if self.time_zone is not None:
             self.tz = parse_tz(self.time_zone)
         else:
-            self.tz = ZoneInfo('CET')
+            self.tz = ZoneInfo("CET")
 
         if self.curve_type is None:
             self.curve_type = detect_curve_type(self.issue_date, self.tag)
         # Validation
         if self.frequency is None:
-            raise CurveException('TS must have frequency')
+            raise CurveException("TS must have frequency")
 
     def __str__(self):
-        size = ''
+        size = ""
         if self.points:
-            size = ' size: {}'.format(len(self.points))
-        return 'TS: {}{}'.format(self.fullname, size)
+            size = " size: {}".format(len(self.points))
+        return "TS: {}{}".format(self.fullname, size)
 
     @property
     def fullname(self):
@@ -116,10 +119,10 @@ class TS(object):
             attrs.append(self.tag)
         if self.issue_date:
             attrs.append(str(self.issue_date))
-        return ' '.join(attrs)
+        return " ".join(attrs)
 
     def to_pandas(self, name=None):
-        """ Converting :class:`volue_insight_timeseries.util.TS` object
+        """Converting :class:`volue_insight_timeseries.util.TS` object
         to a pandas.Series object
 
         Parameters
@@ -134,18 +137,27 @@ class TS(object):
         if name is None:
             name = self.fullname
         if self.points is None or len(self.points) == 0:
-            return pd.Series(name=name, dtype='float64')
+            return pd.Series(name=name, dtype="float64")
 
         index = []
         values = []
         for row in self.points:
             if len(row) != 2:
-                raise ValueError('Points have unexpected contents')
+                raise ValueError("Points have unexpected contents")
             dt = datetime.datetime.fromtimestamp(row[0] / 1000.0, self.tz)
             index.append(dt)
             values.append(row[1])
         res = pd.Series(name=name, index=index, data=values)
-        return res.asfreq(self._map_freq(self.frequency))
+        mapped_freq = res.asfreq(self._map_freq(self.frequency))
+        dropped = mapped_freq.dropna()
+        if len(self.points) != len(dropped):
+            warnings.warn(
+                f"Data length mismatch: original data length is {len(self.points)}, but mapped frequency data length is "
+                f"{len(dropped)}. This may indicate data truncation.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+        return mapped_freq
 
     @staticmethod
     def from_pandas(pd_series):
@@ -183,7 +195,7 @@ class TS(object):
 
     @staticmethod
     def sum(ts_list, name):
-        """ calculate the sum of a given list
+        """calculate the sum of a given list
         of :class:`volue_insight_timeseries.util.TS` objects
 
         Returns a :class:`~volue_insight_timeseries.util.TS`
@@ -205,7 +217,7 @@ class TS(object):
 
     @staticmethod
     def mean(ts_list, name):
-        """ calculate the mean of a given list of TS objects
+        """calculate the mean of a given list of TS objects
 
         Returns a TS (:class:`volue_insight_timeseries.util.TS`) object that is
         the mean of a list of TS objects with the given name.
@@ -225,7 +237,7 @@ class TS(object):
 
     @staticmethod
     def median(ts_list, name):
-        """ calculate the median of a given list of TS objects
+        """calculate the median of a given list of TS objects
 
         Returns a TS (:class:`volue_insight_timeseries.util.TS`) object that is
         the median of a list of TS objects with the given name.
@@ -297,10 +309,10 @@ def parserange(rangeobj, tz=None):
     """
     Parse a range object (a pair of date strings, which may each be None)
     """
-    if rangeobj.get('empty') is True:
+    if rangeobj.get("empty") is True:
         return None
-    begin = rangeobj.get('begin')
-    end = rangeobj.get('end')
+    begin = rangeobj.get("begin")
+    end = rangeobj.get("end")
     if begin is not None:
         begin = parsetime(begin, tz=tz)
     if end is not None:
@@ -309,13 +321,13 @@ def parserange(rangeobj, tz=None):
 
 
 _tzmap = {
-    'CEGT': 'CET',
-    'WEGT': 'WET',
-    'PST': 'US/Pacific',
-    'TRT': 'Turkey',
-    'MSK': 'Europe/Moscow',
-    'ART': 'America/Argentina/Buenos_Aires',
-    'JST': 'Asia/Tokyo',
+    "CEGT": "CET",
+    "WEGT": "WET",
+    "PST": "US/Pacific",
+    "TRT": "Turkey",
+    "MSK": "Europe/Moscow",
+    "ART": "America/Argentina/Buenos_Aires",
+    "JST": "Asia/Tokyo",
 }
 
 
@@ -325,7 +337,7 @@ def parse_tz(time_zone):
             time_zone = _tzmap[time_zone]
         return ZoneInfo(time_zone)
     except ZoneInfoNotFoundError:
-        return ZoneInfo('CET')
+        return ZoneInfo("CET")
 
 
 def detect_curve_type(issue_date, tag):
@@ -348,12 +360,12 @@ def is_integer(s):
 
 
 def make_arg(key, value):
-    if hasattr(value, '__iter__') and not isinstance(value, basestring):
-        return '&'.join([make_arg(key, v) for v in value])
+    if hasattr(value, "__iter__") and not isinstance(value, basestring):
+        return "&".join([make_arg(key, v) for v in value])
 
     if isinstance(value, datetime.date):
         tmp = value.isoformat()
     else:
-        tmp = '{}'.format(value)
+        tmp = "{}".format(value)
     v = quote_plus(tmp)
-    return '{}={}'.format(key, v)
+    return "{}={}".format(key, v)
