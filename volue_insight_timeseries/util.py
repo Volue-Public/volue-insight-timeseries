@@ -36,6 +36,7 @@ _TS_FREQ_TABLE = {
     "H12": "12h",
     "H6": "6h",
     "H3": "3h",
+    "H": "h",
     "MIN30": "30min",
     "MIN15": "15min",
     "MIN5": "5min",
