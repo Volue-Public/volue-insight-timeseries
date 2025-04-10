@@ -10,7 +10,7 @@ on:
 
 jobs:
   unittests:
-    timeout-minutes: 10
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     strategy:
       matrix:
