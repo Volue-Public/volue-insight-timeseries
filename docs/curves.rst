@@ -237,7 +237,7 @@ You can fetch a single instance identified by its issue_date using the
 This function allows you the specify a single tag or a list of tags to the
 ``tag`` argument. If omitted, the default tag is returned. ::
 
-    # get all tags for this issue date
+    # get data for this issue date for the default tag of the curve ('Avg')
     ts_list = curve.get_instance(issue_date='2018-07-01T00:00')
 
     # get data for this issue date for single tag='Avg'
