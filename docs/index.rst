@@ -21,7 +21,7 @@ unless you have a valid Volue Insight account.
 The source code of this library is hosted on github and licensed under the
 ``MIT License``.
 
-https://github.com/volueinsight/volue-insight-timeseries
+https://github.com/Volue-Public/volue-insight-timeseries
 
 This documentation contains the following pages:
 
