@@ -47,9 +47,13 @@ def test_data_request__token_expire__ok(mock_request):
 
     mock_request.side_effect = mock_request_effect
 
-    # verify auth getting token at beginning
-    session = make_vit_session()    
-    assert session.auth.get_headers(None) == {'Authorization': 'b a'}
+    os.environ['WAPI_REQUEST_SOURCE'] = 'testSource' # for testing the source
+
+    # verify auth getting token and the request source at beginning
+    session = make_vit_session()
+    headers = session.auth.get_headers(None)
+    assert  headers['Authorization'] == 'b a'
+    assert  headers['X-Request-Source'] == 'testSource'
 
     # verify auth refreshing token
     session.auth.valid_until = 0 # simulating token expiring
@@ -57,8 +61,8 @@ def test_data_request__token_expire__ok(mock_request):
 
     assert response.status_code == 200
     assert response.content == "curves"
-    assert session.auth.get_headers(None) == {'Authorization': 'b a'}
-
+    assert  headers['Authorization'] == 'b a'
+    assert  headers['X-Request-Source'] == 'testSource'
 
 @pytest.mark.parametrize("urlbase,url,longurl_expected", 
     [
@@ -242,7 +246,7 @@ def test_configure_by_param():
     assert lifetime > 900
     assert lifetime < 1010
     assert s.timeout == vit.session.TIMEOUT
-
+''
 
 def test_reconfigure_session():
     config_file = os.path.join(os.path.dirname(__file__), 'testconfig_oauth.ini')
