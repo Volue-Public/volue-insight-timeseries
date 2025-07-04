@@ -5,6 +5,7 @@
 import json
 import time
 import threading
+import os
 
 try:
     from urllib.parse import urljoin
@@ -59,6 +60,12 @@ class OAuth:
 
     def get_headers(self, data):
         """The web-token auth header is simple"""
+        headers = {}
         if self.token is not None and self.token_type is not None:
-            return {'Authorization': '{} {}'.format(self.token_type, self.token)}
-        return {}
+            headers['Authorization'] = '{} {}'.format(self.token_type, self.token)
+        
+        wapi_request_source = os.getenv('WAPI_REQUEST_SOURCE')
+        if wapi_request_source:
+            headers['X-Request-Source'] = wapi_request_source
+            
+        return headers
