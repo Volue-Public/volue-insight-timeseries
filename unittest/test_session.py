@@ -61,6 +61,7 @@ def test_data_request__token_expire__ok(mock_request):
 
     assert response.status_code == 200
     assert response.content == "curves"
+    headers = session.auth.get_headers(None)
     assert  headers['Authorization'] == 'b a'
     assert  headers['X-Request-Source'] == 'testSource'
 
