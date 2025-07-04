@@ -246,7 +246,6 @@ def test_configure_by_param():
     assert lifetime > 900
     assert lifetime < 1010
     assert s.timeout == vit.session.TIMEOUT
-''
 
 def test_reconfigure_session():
     config_file = os.path.join(os.path.dirname(__file__), 'testconfig_oauth.ini')
