@@ -3,7 +3,7 @@
 Quickstart
 ===========
 
-1. Install with::
+1. Install with pip:
 
     $ pip install -U volue_insight_timeseries
 
