@@ -426,6 +426,8 @@ class Session(object):
             if key not in metadata:
                 raise MetadataException('Mandatory key {} not found in metadata'.format(key))
         curve_id = int(metadata['id'])
+        if('curve_state' in metadata and metadata['curve_state'] == 'DEPRECATED'):
+            warnings.warn("Deprecation warning for curve: {}".format(metadata['name']), DeprecationWarning, stacklevel=4)
         if metadata['curve_type'] in self._curve_types:
             c = self._curve_types[metadata['curve_type']](curve_id, metadata, self)
             return c
