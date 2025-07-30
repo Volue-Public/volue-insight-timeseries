@@ -304,7 +304,7 @@ def test_deprecated_curve(session):
                 'curve_type': 'TIME_SERIES', 'curve_state': 'DEPRECATED'}
     m.register_uri('GET', prefix + '/curves/get?name=deprecatedCurve', text=json.dumps(metadata))
     with warnings.catch_warnings(record=True) as warning:
-        curve = s.get_curve(name="deprecatedCurve")
+        s.get_curve(name="deprecatedCurve")
     assert len(warning) == 1
     assert issubclass(warning[-1].category, DeprecationWarning)
     assert str(warning[-1].message) == "Deprecation warning for curve: deprecatedCurve"
@@ -316,7 +316,7 @@ def test_not_deprecated_curve(session):
                 'curve_type': 'TIME_SERIES', 'curve_state': 'INTERNAL'}
     m.register_uri('GET', prefix + '/curves/get?name=NotDeprecatedCurve', text=json.dumps(metadata))
     with warnings.catch_warnings(record=True) as warning:
-        curve = s.get_curve(name="NotDeprecatedCurve")
+        s.get_curve(name="NotDeprecatedCurve")
     assert len(warning) == 0
 
 #
