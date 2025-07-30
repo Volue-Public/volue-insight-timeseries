@@ -1,9 +1,8 @@
 import json
 import os
-
+import warnings
 import pytest
 import requests_mock
-
 import volue_insight_timeseries as vit
 
 prefix = 'rtsp://test.host/api'
@@ -298,6 +297,27 @@ def test_tagged_inst_get_absolute(tagged_inst_curve):
     assert res.name == 'inst_name'
     assert res.tag == 'tag1'
 
+def test_deprecated_curve(session):
+    s, m = session
+    metadata = {'id': 400, 'name': 'deprecatedCurve',
+                'frequency': 'H', 'time_zone': 'CET',
+                'curve_type': 'TIME_SERIES', 'curve_state': 'DEPRECATED'}
+    m.register_uri('GET', prefix + '/curves/get?name=deprecatedCurve', text=json.dumps(metadata))
+    with warnings.catch_warnings(record=True) as warning:
+        s.get_curve(name="deprecatedCurve")
+    assert len(warning) == 1
+    assert issubclass(warning[-1].category, DeprecationWarning)
+    assert str(warning[-1].message) == "Deprecation warning for curve: deprecatedCurve"
+
+def test_not_deprecated_curve(session):
+    s, m = session
+    metadata = {'id': 500, 'name': 'NotDeprecatedCurve',
+                'frequency': 'H', 'time_zone': 'CET',
+                'curve_type': 'TIME_SERIES', 'curve_state': 'INTERNAL'}
+    m.register_uri('GET', prefix + '/curves/get?name=NotDeprecatedCurve', text=json.dumps(metadata))
+    with warnings.catch_warnings(record=True) as warning:
+        s.get_curve(name="NotDeprecatedCurve")
+    assert len(warning) == 0
 
 #
 # Test events
