@@ -6,7 +6,7 @@ https://api.volueinsight.com/ (or equivalent services). Note that access
 is based on having a valid Volue Insight account. Please contact
 sales.insight@volue.com in order to get a trial account.
 
-The library is tested against Python 3.9, 3.10, 3.11 and 3.12 - we recommend using 
+The library is tested against Python 3.9, 3.10, 3.11, 3.12 and 3.13 - we recommend using 
 the latest Python version.
 
 
@@ -54,7 +54,7 @@ the event of a severe bug that we will do any changes to it.
 These are the steps you will have to do in order to successfully
 make the switch. 
 
-* Use Python 3.9, 3.10, 3.11 or 3.12
+* Use Python 3.9, 3.10, 3.11, 3.12 or 3.13
 * Use Pandas 1.5.0 or newer
 * Use [zoneinfo](https://docs.python.org/3/library/zoneinfo.html), not pytz for handling time zone information
 
