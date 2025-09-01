@@ -1,4 +1,3 @@
-from past.types import basestring
 import warnings
 
 from . import util
@@ -247,7 +246,7 @@ class TaggedCurve(BaseCurve):
             args = []
             unwrap = True
         else:
-            if isinstance(tag, basestring):
+            if isinstance(tag, str):
                 unwrap = True
             args=[util.make_arg('tag', tag)]
         self._add_from_to(args, data_from, data_to)
@@ -1070,7 +1069,7 @@ class TaggedInstanceCurve(BaseCurve):
         if tag is None:
             unwrap = True
         else:
-            if isinstance(tag, basestring):
+            if isinstance(tag, str):
                 unwrap = True
             args.append(util.make_arg('tag', tag))
         if with_data:

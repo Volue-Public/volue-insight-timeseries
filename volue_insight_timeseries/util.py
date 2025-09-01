@@ -9,7 +9,6 @@ import dateutil.parser
 import pandas as pd
 import numpy as np
 import warnings
-from past.types import basestring
 
 try:
     from urllib.parse import quote_plus
@@ -366,7 +365,7 @@ def is_integer(s):
 
 
 def make_arg(key, value):
-    if hasattr(value, "__iter__") and not isinstance(value, basestring):
+    if hasattr(value, "__iter__") and not isinstance(value, str):
         return "&".join([make_arg(key, v) for v in value])
 
     if isinstance(value, datetime.date):

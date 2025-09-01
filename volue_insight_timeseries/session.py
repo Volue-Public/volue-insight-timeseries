@@ -7,7 +7,6 @@ import requests
 import json
 import time
 import warnings
-from past.types import basestring
 import configparser
 
 from . import auth, curves, events, util
@@ -450,7 +449,7 @@ class Session(object):
         databytes = None
         if data is not None:
             headers['content-type'] = 'application/json'
-            if isinstance(data, basestring):
+            if isinstance(data, str):
                 databytes = data.encode()
             else:
                 databytes = json.dumps(data).encode()
@@ -475,7 +474,7 @@ class Session(object):
 
         databytes = None
         if data is not None:
-            if isinstance(data, basestring):
+            if isinstance(data, str):
                 databytes = data.encode()
             else:
                 databytes = json.dumps(data).encode()
