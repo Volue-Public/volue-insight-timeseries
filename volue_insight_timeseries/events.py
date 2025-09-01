@@ -7,7 +7,6 @@ import threading
 import queue
 
 from . import curves, util
-from builtins import str
 
 
 class EventListener:
