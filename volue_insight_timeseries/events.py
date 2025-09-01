@@ -32,7 +32,7 @@ class EventListener:
         self.queue = queue.Queue()
         self.do_shutdown = False
         self.worker = threading.Thread(target=self.fetch_events)
-        self.worker.setDaemon(True)
+        self.worker.daemon = True
         self.worker.start()
 
     def get(self):
