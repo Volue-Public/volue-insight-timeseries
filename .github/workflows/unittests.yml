@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         python-version: [ '3.10' , '3.11', '3.12', '3.13' ]
-        libraries-versions: [ 'pandas==1.5.2', 'pandas==2.2.2', 'pandas>=2.2.3' ]
+        libraries-versions: [ 'pandas==1.5.2 "numpy<2.0"', 'pandas==2.2.2', 'pandas>=2.2.3' ]
         exclude:
           - python-version: '3.13'
             libraries-versions: 'pandas==1.5.2 "numpy<2.0"'
