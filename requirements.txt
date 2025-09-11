@@ -1,4 +1,4 @@
 requests>=2.18
 sseclient-py>=1.7
 pandas>=1.5.0; python_version >= "3.10" and python_version < "3.13"
-pandas>=2.3.2; python_version >= "3.13"
+pandas>=2.3.2; python_version ~= "3.13"
