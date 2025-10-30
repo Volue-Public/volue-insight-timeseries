@@ -155,11 +155,7 @@ class TS(object):
         # Gas Day is a 24-hour period starting at 4:00 UTC in summer and 5:00 UTC in winter, 
         # and finishing at 4:00 UTC (or 5:00) the next day. corresponding to 6:00 local time in Germany year-round.
         # A gas loader bug causes timestamps on the day after DST to shift to 5:00 or 7:00 instead of 6:00.
-        number_of_nan = 0
-        for point in self.points:
-            if point[1] is None:
-                number_of_nan += 1
-
+        number_of_nan = sum(1 for point in self.points if point[1] is None)
         if len(self.points) -  number_of_nan  != len(dropped):
             warnings.warn(
                 f"Data length mismatch: original data length is {len(self.points)}, but mapped frequency data length is "
