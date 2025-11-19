@@ -14,8 +14,8 @@ def extract_requirements(req_file_path: str) -> list[str]:
 
     with open(req_file_path, "rt") as req_file:
         for line in req_file:
-            req = re.sub(r"\s+", "", line, flags=re.UNICODE)
-            req = req.split("#")[0] # skip comment
+            req = line.strip()
+            req = req.split("#")[0].strip()
 
             if len(req):  # skip empty line
                 req_lst.append(req)
