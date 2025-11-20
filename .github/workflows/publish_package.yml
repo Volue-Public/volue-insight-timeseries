@@ -1,16 +1,10 @@
 name: Publish package
 
 on:
-  push:
-    branches:
-      - master
-
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Version to publish"
-        required: false
-        default: ""
+  workflow_run:
+    workflows: ["Create Release"]
+    types:
+      - completed
 
 jobs:
   publish-package:
@@ -31,21 +25,14 @@ jobs:
       - name: Read version
         id: read-version
         run: |
-
-          # override VERSION file with input from dispatch action
-          if [ ${{ github.event_name }} == "workflow_dispatch" ]; then
-            version_input=${{ github.event.inputs.version }}
-            echo $version_input > volue_insight_timeseries/VERSION
-          fi
-
-          version=$(<volue_insight_timeseries/VERSION)
+          git checkout main
+          tag_name=$(git describe --tags --exact-match)
+          version=${tag_name#v}
           echo "VERSION=$version" >> "$GITHUB_OUTPUT"
-          echo "version is $version"
 
       - name: Build dist
         id: build-dist
         run: |
-          
           VERSION=${{ steps.read-version.outputs.VERSION }}
           rm -rf dist
           python setup.py sdist bdist_wheel

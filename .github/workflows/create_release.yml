@@ -1,26 +1,28 @@
-on:
-  push:
-    branches:
-      - master
+name: Create Release
 
-name: Create Release 
+on:
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: "Specify the version number bump"
+        required: false
+        type: choice
+        options:
+          - minor
+          - major
+          - patch
 
 jobs:
-  create-github-release:
-    name: Create GitHub Release
+  tag-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: read
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Read version
-        id: read-version
-        run: |
-          version=$(<volue_insight_timeseries/VERSION)
-          echo "VERSION=$version" >> "$GITHUB_OUTPUT"
-          echo "version is $version"
-      - name: Create Release
-        run: gh release create ${{ steps.read-version.outputs.VERSION }} --generate-notes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: rymndhng/release-on-push-action@aebba2bbce07a9474bf95e8710e5ee8a9e922fe2 # v0.28.0
+        id: tag-release
+        with:
+          bump_version_scheme: ${{ github.event.inputs.version_bump }}
+          use_github_release_notes: true

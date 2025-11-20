@@ -5,8 +5,7 @@ on:
 
   push:
     branches:
-      - development
-      - master
+      - main
 
 jobs:
   unittests:
