@@ -8,6 +8,7 @@ on:
 
 jobs:
   publish-package:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     timeout-minutes: 10
     runs-on: ubuntu-latest
     permissions:
@@ -28,12 +29,12 @@ jobs:
           git checkout main
           tag_name=$(git describe --tags --exact-match)
           version=${tag_name#v}
+          echo "$version" > volue_insight_timeseries/VERSION
           echo "VERSION=$version" >> "$GITHUB_OUTPUT"
 
       - name: Build dist
         id: build-dist
         run: |
-          VERSION=${{ steps.read-version.outputs.VERSION }}
           rm -rf dist
           python setup.py sdist bdist_wheel
 
