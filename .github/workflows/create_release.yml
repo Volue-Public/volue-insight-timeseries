@@ -26,3 +26,4 @@ jobs:
         with:
           bump_version_scheme: ${{ github.event.inputs.version_bump }}
           use_github_release_notes: true
+          tag_prefix: ""
