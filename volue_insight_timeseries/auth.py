@@ -64,8 +64,8 @@ class OAuth:
         if self.token is not None and self.token_type is not None:
             headers['Authorization'] = '{} {}'.format(self.token_type, self.token)
         
-        wapi_request_source = os.getenv('WAPI_REQUEST_SOURCE')
+        wapi_request_source = os.getenv('REPORTED_DATA_SOURCE')
         if wapi_request_source:
-            headers['X-Request-Source'] = wapi_request_source
+            headers['X-Model-Name'] = wapi_request_source
             
         return headers
