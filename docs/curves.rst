@@ -15,6 +15,10 @@ There are 4 types of curves:
 * INSTANCES
 * TAGGED_INSTANCES
 
+Additionally, there is a specialized curve type:
+
+* PAIRED_LIST - for data structures with two related values per point.
+
 This chapter describes how to search for available curves in the API and
 how to access the stored data, based on the given curve type.
 
@@ -286,6 +290,42 @@ the default tag is returned. ::
 .. automethod:: volue_insight_timeseries.curves.TaggedInstanceCurve.get_latest
     :noindex:
 
+Getting data from a PAIRED_LIST curve
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A PairedList curve contains paired values where each data point has two related values, such
+as price and volume.
+
+The existing set of tags of a curve can be found using the
+:meth:`~volue_insight_timeseries.curves.PairedListCurve.get_tags` method::
+
+        tags = curve.get_tags()
+
+You can fetch paired data using the
+:meth:`~volue_insight_timeseries.curves.PairedListCurve.get_data` method.
+The ``with_data`` argument controls whether to return full data (``True``) or metadata only (``False``)::
+
+
+      paired_data = curve.get_data(data_from='2025-01-01',
+                                    data_to='2025-01-31',
+                                    with_data=True)
+
+When ``with_data=True``, the method returns :class:`~volue_insight_timeseries.util.PairedTS` objects
+which contain the paired values. These can be converted to a pandas DataFrame where each tag becomes a column::
+
+      # convert to DataFrame
+      df = paired_data[0].to_pandas()
+
+  .. note::
+      PairedList curves do not support the following methods: ``get_latest()``,
+      ``get_instance()``, ``search_instances()``, ``get_relative()``, and ``get_absolute()``.
+      These methods will raise a ``MethodNotApplicable`` exception.
+
+  .. automethod:: volue_insight_timeseries.curves.PairedListCurve.get_tags
+      :noindex:
+
+  .. automethod:: volue_insight_timeseries.curves.PairedListCurve.get_data
+      :noindex:
 
 .. _use-TS:
 
@@ -334,8 +374,24 @@ and :meth:`~volue_insight_timeseries.util.TS.median` .
     :noindex:
 
 
+PAIRED_LIST curves return :class:`~volue_insight_timeseries.util.PairedTS` objects
+instead of regular :class:`~volue_insight_timeseries.util.TS` objects.
+The :meth:`~volue_insight_timeseries.util.PairedTS.to_pandas` function
+returns a `pandas.DataFrame`_ object (instead of a Series) where each tag becomes a column::
 
+  >>> curve = session.get_curve(name='paired_list curve name')
+  >>> paired_data = curve.get_data(data_from="2025-12-18", data_to="2025-12-19", with_data=True)
+  >>> df = paired_data[0].to_pandas()
+  >>> df.head()
+       price  volume
+  0  -581.93     5.0
+  1  -572.00     5.0
+  2  -562.97     5.0
+  3  -544.84     5.0
+  4  -536.21     5.0
 
+.. automethod:: volue_insight_timeseries.util.PairedTS.to_pandas
+  :noindex:
 
 .. _api web interface: https://api.volueinsight.com/
 .. _documentation: https://api.volueinsight.com/#documentation

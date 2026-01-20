@@ -1410,3 +1410,118 @@ class TaggedInstanceCurve(BaseCurve):
         if result is None:
             return result
         return util.TS(input_dict=result, curve_type=util.TAGGED_INSTANCES)
+
+class PairedListCurve(TaggedInstanceCurve):
+    """
+    Specialized curve class for handling paired market data (e.g., price-volume, bid-offer, merit-order)
+    Inherits from TaggedInstanceCurve to leverage core timeseries operations.
+    This curve type supports three dimensions, time (t), value-dimension 1 (y) and value-dimension 2 (z).
+
+    Supported methods:
+    - get_tags(): Get available tags for this curve
+    - get_data(): Get paired data with date filtering
+    - access(): Get access control metadata
+    """
+    def get_latest(self, *args, **kwargs):
+        raise util.MethodNotApplicable(
+            "get_latest() is not applicable for PairedList curves. "
+            "Use get_data(data_from=..., data_to=..., with_data=True) instead."
+        )
+
+    def get_relative(self, *args, **kwargs):
+        raise util.MethodNotApplicable(
+            "get_relative() is not applicable for PairedList curves. "
+            "Use get_data(data_from=..., data_to=..., with_data=True) instead."
+        )
+
+    def get_absolute(self, *args, **kwargs):
+        raise util.MethodNotApplicable(
+            "get_absolute() is not applicable for PairedList curves. "
+            "Use get_data(data_from=..., data_to=..., with_data=True) instead."
+        )
+
+    def get_instance(self, *args, **kwargs):
+        raise util.MethodNotApplicable(
+            "get_instance() is not applicable for PairedList curves. "
+            "Use get_data(data_from=..., data_to=..., with_data=True) instead."
+        )
+
+    def search_instances(self, *args, **kwargs):
+        raise util.MethodNotApplicable(
+            "search_instances() is not applicable for PairedList curves. "
+            "Use get_data(data_from=..., data_to=..., with_data=False) to list instances."
+        )
+
+    def get_data(self, data_from=None, data_to=None, with_data=False):
+        """
+        Get paired data from the PairedList curve.
+
+        This method calls the `/api/instances/paired/{id}` endpoint to retrieve
+        paired market data (e.g., price-volume pairs, bid-offer spreads).
+
+        Parameters
+        ----------
+        data_from : time-stamp, optional
+            Start date (and time) for filtering data points. If not provided,
+            all available data from the beginning will be included.
+            The timestamp can be provided as:
+
+            * datestring in format '%Y-%M-%DT%h:%m:%sZ', e.g. '2025-01-01'
+            * pandas.Timestamp object
+            * datetime.datetime object
+
+        data_to : time-stamp, optional
+            End date (and time) for filtering data points. If not provided,
+            all available data until the end will be included.
+            End dates are always excluded in the result!
+
+        with_data : bool, optional
+            If True, the response includes the actual paired data points.
+            If False (default), only metadata for each instance is returned.
+
+        Returns
+        -------
+        list of :class:`volue_insight_timeseries.util.PairedTS` or :class:`volue_insight_timeseries.util.TS`
+            Returns a list of PairedTS objects when with_data=True, containing
+            metadata and paired data points. Returns a list of regular TS objects
+            with metadata only when with_data=False.
+
+        Examples
+        --------
+        Get metadata only::
+
+            instances = curve.get_data(
+                data_from='2025-01-01',
+                data_to='2025-01-31',
+                with_data=False
+            )
+
+        Get full paired data::
+
+            instances = curve.get_data(
+                data_from='2025-01-01',
+                data_to='2025-01-31',
+                with_data=True
+            )
+
+            # Convert to pandas DataFrame
+            df = instances[0].to_pandas()
+        """
+        args = []
+        args.append(util.make_arg('with_data', str(with_data).lower()))
+        self._add_from_to(args, data_from, data_to, prefix='data_')
+
+        astr = '&'.join(args)
+        url = '/api/instances/paired/{}?{}'.format(self.id, astr)
+        result = self._load_data(url, 'Failed to find paired data instances')
+
+        if result is None:
+            return result
+
+        # Return list of PairedTS or TS objects
+        if with_data:
+            return [util.PairedTS(input_dict=r, curve_type=util.PAIRED_LIST)
+                    for r in result]
+        else:
+            return [util.TS(input_dict=r, curve_type=util.PAIRED_LIST)
+                    for r in result]

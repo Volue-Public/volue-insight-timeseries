@@ -429,6 +429,10 @@ class Session(object):
             warnings.warn("Deprecation warning for curve: {}".format(metadata['name']), DeprecationWarning, stacklevel=4)
         if metadata['curve_type'] in self._curve_types:
             c = self._curve_types[metadata['curve_type']](curve_id, metadata, self)
+            if isinstance(c, curves.TaggedInstanceCurve):
+                categories = getattr(c, 'categories', []) or []
+                if 'PAIRED-LIST' in categories:
+                    c.__class__ = curves.PairedListCurve
             return c
         raise CurveException('Unknown curve type ({})'.format(metadata['curve_type']))
 
