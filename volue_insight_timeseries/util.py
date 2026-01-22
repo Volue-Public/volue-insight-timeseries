@@ -9,6 +9,7 @@ import dateutil.parser
 import pandas as pd
 import numpy as np
 import warnings
+from typing import Optional
 
 try:
     from urllib.parse import quote_plus
@@ -23,6 +24,7 @@ TIME_SERIES = "TIME_SERIES"
 TAGGED = "TAGGED"
 INSTANCES = "INSTANCES"
 TAGGED_INSTANCES = "TAGGED_INSTANCES"
+PAIRED_LIST = "PAIRED_LIST"
 
 
 # Frequency mapping from TS to Pandas
@@ -64,6 +66,12 @@ for ts_freq, pandas_freq in _TS_FREQ_TABLE.items():
 
 
 class CurveException(Exception):
+    pass
+
+class MethodNotApplicable(Exception):
+    """
+    Exception raised when a method is not applicable for a specific curve type.
+    """
     pass
 
 
@@ -261,6 +269,53 @@ class TS(object):
         df = _ts_list_to_dataframe(ts_list)
         return _generated_series_to_TS(df.median(axis=1), name)
 
+class PairedTS(TS):
+    """
+    A class to hold paired data from a PairedListCurve, extending the standard TS object.
+    Used for data like price-volume pairs, where each point is a tuple/list.
+    """
+
+    tags: Optional[list] = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if not isinstance(self.tags, list) or not self.tags:
+            raise ValueError(
+                "PairedTS requires 'tags' as a non-empty list to label the DataFrame columns."
+            )
+
+        # Validate points structure
+        if self.points:
+            if not isinstance(self.points[0], (list, tuple)):
+                raise ValueError("Each point in PairedTS must be a list or tuple.")
+
+            values_per_point = len(self.points[0])
+            if values_per_point != len(self.tags):
+                raise ValueError(
+                    f"Point structure mismatch: ({len(self.tags)}) tags provided but each point has ({values_per_point}) values."
+                )
+
+
+    def to_pandas(self, name=None) -> pd.DataFrame:
+        """
+        Convert the PairedTS object to a pandas.DataFrame.
+        Rows = paired points, columns = tags.
+
+        Returns:
+            pandas.DataFrame
+            A pandas.DataFrame representing the paired data, with curve metadata
+            stored in the `.attrs` dictionary.
+        """
+        df = pd.DataFrame(self.points or [], columns=self.tags)
+
+        # Curve Metadata in DataFrame attributes
+        df.attrs["name"] = self.fullname
+        df.attrs["frequency"] = self.frequency
+        df.attrs["issue_date"] = self.issue_date
+        df.attrs["length"] = len(self.points or [])
+
+        return df
 
 def _generated_series_to_TS(series, name):
     series.name = name
