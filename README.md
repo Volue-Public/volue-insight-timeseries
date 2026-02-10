@@ -6,7 +6,7 @@ https://api.volueinsight.com/ (or equivalent services). Note that access
 is based on having a valid Volue Insight account. Please contact
 sales.insight@volue.com in order to get a trial account.
 
-The library is tested against Python 3.10, 3.11, 3.12 and 3.13. Please only use either of these python versions.
+The library is tested against Python 3.10, 3.11, 3.12, 3.13 and 3.14. Please only use either of these python versions.
 
 
 ## Documentation
@@ -37,8 +37,8 @@ breaking changes.
 ```bash
 # your requirements.txt
 
-volue-insight-timeseries==1.0.0 # Good
-volue-insight-timeseries # Bad
+volue-insight-timeseries==X.Y.Z # Good - Pin to specific version
+volue-insight-timeseries # Bad - Unpinned, may break on updates
 ```
 
 We follow [Semantic Versioning](https://semver.org/spec/v2.0.0-rc.2.html)
@@ -53,8 +53,8 @@ the event of a severe bug that we will do any changes to it.
 These are the steps you will have to do in order to successfully
 make the switch. 
 
-* Use Python 3.10, 3.11, 3.12 or 3.13
-* Use Pandas 1.5.0 or newer for python 3.10-3.12. Use Pandas 2.2.3 or newer for python 3.13 or newer
+* Use Python 3.10, 3.11, 3.12, 3.13 or 3.14
+* Use Pandas 1.5.0 or newer for python 3.10-3.12. Use Pandas 2.2.3 or newer for python 3.13. Use Pandas 2.3.3 or newer for python 3.14
 * Use [zoneinfo](https://docs.python.org/3/library/zoneinfo.html), not pytz for handling time zone information
 
 ### Example of migrating an existing script
