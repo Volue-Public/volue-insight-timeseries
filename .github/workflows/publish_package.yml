@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: '3.14'
 
-      - run: pip install -U twine wheel
+      - run: pip install -U setuptools twine wheel
 
       - name: Read version
         id: read-version
