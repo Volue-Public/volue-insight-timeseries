@@ -16,7 +16,7 @@ The
 with various 
 [examples](https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/guides/examples)
 
-###
+### How to edit documentation
 
 Documentation source can be updated in the internal repo: 
 https://github.com/Volue/sirius-core-py-docs
