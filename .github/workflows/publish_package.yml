@@ -6,6 +6,9 @@ on:
     types:
       - completed
 
+permissions:
+  contents: read
+
 jobs:
   publish-package:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}

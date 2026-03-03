@@ -12,6 +12,9 @@ on:
           - major
           - patch
 
+permissions:
+  contents: read
+
 jobs:
   tag-release:
     runs-on: ubuntu-latest

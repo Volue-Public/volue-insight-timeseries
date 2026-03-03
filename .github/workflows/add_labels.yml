@@ -9,6 +9,9 @@ name: labeler
 on:
   - pull_request
 
+permissions:
+  contents: read
+
 jobs:
   label:
 
