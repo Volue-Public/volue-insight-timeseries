@@ -5,7 +5,7 @@ This example shows the same results as the TIME_SERIES aggregation
 example, where the data is aggregated in the backend:
 https://github.com/volueinsight/volue-insight-timeseries/blob/master/examples/Timeseries_curve_examples/ts_aggregation.py
 Have a look at the pandas documentation for further information:
-https://wattsight-volue-insight-timeseries.readthedocs-hosted.com/en/latest/index.html
+https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/
 """
 import volue_insight_timeseries
 import pandas as pd
