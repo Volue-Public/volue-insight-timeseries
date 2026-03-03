@@ -12,9 +12,9 @@ The library is tested against Python 3.10, 3.11, 3.12, 3.13 and 3.14. Please onl
 ## Documentation
 
 The 
-[documentation](https://wattsight-volue-insight-timeseries.readthedocs-hosted.com/en/master/) 
+[documentation](https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/) 
 with various 
-[examples](https://wattsight-volue-insight-timeseries.readthedocs-hosted.com/en/master/examples.html)
+[examples](https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/guides/examples)
 is hosted on Read the Docs.
 
 ## Installation

@@ -1,7 +1,7 @@
 """
 This simple example reads aggregated data from an TIME_SERIES curve
 Have a look at the documentation for further information:
-https://wattsight-volue-insight-timeseries.readthedocs-hosted.com/en/latest/index.html
+https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/
 """
 import volue_insight_timeseries
 import pandas as pd
