@@ -15,7 +15,6 @@ The
 [documentation](https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/) 
 with various 
 [examples](https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/guides/examples)
-is hosted on Read the Docs.
 
 ## Installation
 
