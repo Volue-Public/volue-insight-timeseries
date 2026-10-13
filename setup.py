@@ -26,7 +26,7 @@ with open(os.path.join(here, 'volue_insight_timeseries/VERSION')) as fv:
 
 setup(
     name='volue_insight_timeseries',
-    python_requires='>=3.10, <3.15',
+    python_requires='>=3.11, <3.15',
     packages=find_packages(),
     install_requires=extract_requirements('requirements.txt'),
     tests_require=[
