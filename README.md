@@ -2,7 +2,7 @@
 Volue Insight API python library for working with timeseries.
 
 This library is meant as a simple toolkit for working with data from
-https://api.volueinsight.com/ (or equivalent services). Note that access
+https://api.data-forecasts.volue.com/ (or equivalent services). Note that access
 is based on having a valid Volue Insight account. Please contact
 sales.insight@volue.com in order to get a trial account.
 
