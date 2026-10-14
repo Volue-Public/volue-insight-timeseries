@@ -265,3 +265,117 @@ def test_reconfigure_session():
     with pytest.raises(vit.session.ConfigException) as exinfo:
         s.configure('clientid', 'clientsecret')
     assert 'already done' in str(exinfo.value)
+
+
+#
+# Test Volue Identity authentication
+#
+VI_TOKEN_URL = 'https://auth.identity.volue.com/connect/token'
+API_CURVES_URL = vit.session.API_URLBASE + '/api/v1/timeseries/curves'
+VI_TOKEN = json.dumps({'token_type': 'Bearer', 'access_token': 'vitoken', 'expires_in': 3600})
+
+
+def test_volue_identity_by_file():
+    config_file = os.path.join(os.path.dirname(__file__), 'testconfig_volueidentity.ini')
+    with requests_mock.Mocker() as m:
+        m.post(VI_TOKEN_URL, text=VI_TOKEN)
+        s = vit.Session(config_file=config_file)
+        token_request = m.request_history[0]
+    assert isinstance(s.auth, vit.auth.VolueIdentity)
+    assert s.urlbase == 'https://test.host'
+    assert s.auth.auth_urlbase == 'https://auth.identity.volue.com'
+    assert s.auth.token == 'vitoken'
+    body = dict(pair.split('=') for pair in token_request.text.split('&'))
+    assert body == {'grant_type': 'client_credentials', 'scope': 'in.dnf%3Aapi'}
+    assert token_request.headers['Authorization'].startswith('Basic ')
+
+
+def test_volue_identity_by_param():
+    with requests_mock.Mocker() as m:
+        m.post('https://auth.test.host/connect/token', text=VI_TOKEN)
+        s = vit.Session(client_id='viclientid', client_secret='visecret',
+                        auth_urlbase='https://auth.test.host', auth_type='VolueIdentity')
+    assert isinstance(s.auth, vit.auth.VolueIdentity)
+    assert s.auth.client_id == 'viclientid'
+    # The API address is not changed by the auth type
+    assert s.urlbase == vit.session.API_URLBASE
+
+
+def test_oauth_sends_no_scope():
+    with requests_mock.Mocker() as m:
+        m.post('https://auth.volueinsight.com/oauth2/token', text=VI_TOKEN)
+        s = vit.Session(client_id='client', client_secret='secret')
+        assert m.request_history[0].text == 'grant_type=client_credentials'
+    assert type(s.auth) is vit.auth.OAuth
+
+
+def test_unknown_auth_type():
+    config_file = os.path.join(os.path.dirname(__file__), 'testconfig_unknown_auth.ini')
+    with pytest.raises(vit.session.ConfigException, match='VolueIdentiy'):
+        vit.Session(config_file=config_file)
+    with pytest.raises(vit.session.ConfigException, match='Unknown auth_type'):
+        vit.Session(client_id='client', client_secret='secret', auth_type='Sales')
+
+
+@pytest.mark.parametrize('auth_type,token_url,error,expected', [
+    ('VolueIdentity', VI_TOKEN_URL, 'invalid_client', 'set auth_type = OAuth'),
+    ('OAuth', 'https://auth.volueinsight.com/oauth2/token', 'invalid_client', 'set auth_type = VolueIdentity'),
+    ('VolueIdentity', VI_TOKEN_URL, 'invalid_scope', 'not allowed to access'),
+])
+def test_token_request_errors(auth_type, token_url, error, expected):
+    with requests_mock.Mocker() as m:
+        m.post(token_url, status_code=400, json={'error': error})
+        with pytest.raises(vit.auth.AuthFailedException) as e:
+            vit.Session(client_id='client', client_secret='secret', auth_type=auth_type)
+    assert 'Authentication failed ({})'.format(auth_type) in str(e.value)
+    assert error in str(e.value)
+    assert expected in str(e.value)
+    if error == 'invalid_client':
+        assert 'revoked or have expired' in str(e.value)
+
+
+def test_token_endpoint_not_found():
+    with requests_mock.Mocker() as m:
+        m.post('https://auth.identity.volue.com/oauth2/token', status_code=404, text='Not found')
+        with pytest.raises(vit.auth.AuthFailedException, match='auth_type and auth_urlbase'):
+            vit.Session(client_id='client', client_secret='secret',
+                        auth_urlbase='https://auth.identity.volue.com')
+
+
+def test_volue_identity_token_rejected_by_api():
+    with requests_mock.Mocker() as m:
+        m.post(VI_TOKEN_URL, text=VI_TOKEN)
+        m.get(API_CURVES_URL, status_code=401)
+        s = vit.Session(client_id='client', client_secret='secret', auth_type='VolueIdentity')
+        with pytest.raises(vit.auth.AuthFailedException, match='keep using your current credentials'):
+            s.data_request('GET', None, '/api/v1/timeseries/curves')
+
+
+def test_oauth_401_is_returned_unchanged():
+    with requests_mock.Mocker() as m:
+        m.post('https://auth.volueinsight.com/oauth2/token', text=VI_TOKEN)
+        m.get(API_CURVES_URL, status_code=401)
+        s = vit.Session(client_id='client', client_secret='secret')
+        assert s.data_request('GET', None, '/api/v1/timeseries/curves').status_code == 401
+
+
+def test_user_agent_has_library_version():
+    with requests_mock.Mocker() as m:
+        m.post(VI_TOKEN_URL, text=VI_TOKEN)
+        m.get(API_CURVES_URL, text='[]')
+        s = vit.Session(client_id='client', client_secret='secret', auth_type='VolueIdentity')
+        s.data_request('GET', None, '/api/v1/timeseries/curves')
+        user_agents = [r.headers['User-Agent'] for r in m.request_history]
+    expected = 'volue-insight-timeseries/{} '.format(vit.__version__)
+    assert all(ua.startswith(expected) for ua in user_agents)
+
+
+def test_auth_type_enum():
+    assert str(vit.auth.AuthType.VOLUE_IDENTITY) == 'VolueIdentity'
+    assert vit.auth.AuthType('OAuth') is vit.auth.AuthType.OAUTH
+    with requests_mock.Mocker() as m:
+        m.post(VI_TOKEN_URL, text=VI_TOKEN)
+        s = vit.Session(client_id='client', client_secret='secret',
+                        auth_type=vit.auth.AuthType.VOLUE_IDENTITY)
+    assert isinstance(s.auth, vit.auth.VolueIdentity)
+    assert s.auth.auth_type is vit.auth.AuthType.VOLUE_IDENTITY
