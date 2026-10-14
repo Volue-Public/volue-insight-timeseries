@@ -1,16 +1,22 @@
 documentation:
-  - '**/*.md'
+  - changed-files:
+      - any-glob-to-any-file: '**/*.md'
 
 dependencies:
-  - 'requirements.txt'
+  - changed-files:
+      - any-glob-to-any-file: 'requirements.txt'
 
 feature:
-  - '**/*.py'
+  - changed-files:
+      - any-glob-to-any-file: '**/*.py'
 
 internal:
-  - '.github/**'
-  - 'releases/**'
-    
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**'
+          - 'releases/**'
+
 # we don't want Release PR in the changelog
 ignore-for-release:
-  - 'volue_insight_timeseries/VERSION'
+  - changed-files:
+      - any-glob-to-any-file: 'volue_insight_timeseries/VERSION'
