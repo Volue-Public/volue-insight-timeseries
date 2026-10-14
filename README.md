@@ -6,7 +6,7 @@ https://api.volueinsight.com/ (or equivalent services). Note that access
 is based on having a valid Volue Insight account. Please contact
 sales.insight@volue.com in order to get a trial account.
 
-The library is tested against Python 3.10, 3.11, 3.12, 3.13 and 3.14. Please only use either of these python versions.
+The library is tested against Python 3.11, 3.12, 3.13 and 3.14. Please only use either of these python versions.
 
 
 ## Documentation
@@ -57,8 +57,8 @@ the event of a severe bug that we will do any changes to it.
 These are the steps you will have to do in order to successfully
 make the switch. 
 
-* Use Python 3.10, 3.11, 3.12, 3.13 or 3.14
-* Use Pandas 1.5.0 or newer for python 3.10-3.12. Use Pandas 2.2.3 or newer for python 3.13. Use Pandas 2.3.3 or newer for python 3.14
+* Use Python 3.11, 3.12, 3.13 or 3.14
+* Use Pandas 1.5.0 or newer for python 3.11. Use Pandas 2.1.1 or newer for python 3.12. Use Pandas 2.2.3 or newer for python 3.13. Use Pandas 2.3.3 or newer for python 3.14
 * Use [zoneinfo](https://docs.python.org/3/library/zoneinfo.html), not pytz for handling time zone information
 
 ### Example of migrating an existing script
@@ -67,7 +67,7 @@ highlight things that are changing, not a recommended way to write production
 code.
 
 ```python
-# python 3.10.18
+# python 3.11.17
 # pip install wapi-python==0.7.15
 # pip install python-dotenv==1.0.1
 #
@@ -101,7 +101,7 @@ if results:
 The migrated script is below
 
 ```python
-# python 3.10.18
+# python 3.11.17
 # pip install volue-insight-timeseries==1.2.0
 # pip install python-dotenv==1.0.1
 #
