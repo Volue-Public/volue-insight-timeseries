@@ -27,9 +27,20 @@ jobs:
 
       - name: Read version
         id: read-version
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           git checkout main
-          tag_name=$(git describe --tags --exact-match)
+          # The newest release (final or rc) is the one "Create Release" just
+          # made. Resolve it by release rather than `git describe`, which is
+          # ambiguous when an rc tag and the final tag sit on the same commit.
+          tag_name=$(gh release list --repo "${GITHUB_REPOSITORY}" --limit 1 --json tagName --jq '.[0].tagName')
+          tag_sha=$(git rev-parse "${tag_name}^{commit}")
+          if [[ "${tag_sha}" != "$(git rev-parse HEAD)" ]]; then
+            echo "Newest release ${tag_name} is at ${tag_sha}, not at the checked-out main HEAD" >&2
+            exit 1
+          fi
           version=${tag_name#v}
           echo "$version" > volue_insight_timeseries/VERSION
           echo "VERSION=$version" >> "$GITHUB_OUTPUT"
