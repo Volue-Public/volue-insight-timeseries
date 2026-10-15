@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: '3.14'
 
-      - run: pip install -U setuptools twine wheel
+      - run: pip install -U build
 
       - name: Read version
         id: read-version
@@ -38,7 +38,7 @@ jobs:
         id: build-dist
         run: |
           rm -rf dist
-          python setup.py sdist bdist_wheel
+          python -m build
 
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2

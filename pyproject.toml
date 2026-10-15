@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "volue-insight-timeseries"
+description = "Volue Insight API python library"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Volue Insight", email = "support.insight@volue.com" }]
+requires-python = ">=3.11, <3.15"
+dependencies = [
+    "requests>=2.34.2",
+    "sseclient-py>=1.9.0",
+    'pandas>=1.5.0; python_version == "3.11"',
+    'pandas>=2.1.1; python_version == "3.12"',
+    'pandas>=2.2.3; python_version == "3.13"',
+    'pandas>=2.3.3; python_version == "3.14"',
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+test = [
+    "pytest-cov>=7.1.0",
+    "requests-mock>=1.12.1",
+]
+
+[project.urls]
+Homepage = "https://volueinsight.com/"
+Documentation = "https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/"
+Source = "https://github.com/Volue-Public/volue-insight-timeseries"
+Issues = "https://github.com/Volue-Public/volue-insight-timeseries/issues"
+
+[tool.setuptools.packages.find]
+include = ["volue_insight_timeseries*"]
+
+[tool.setuptools.package-data]
+volue_insight_timeseries = ["VERSION"]
+
+[tool.setuptools.dynamic]
+version = { file = "volue_insight_timeseries/VERSION" }
+
+[tool.pytest.ini_options]
+addopts = "--cov volue_insight_timeseries"
+python_files = "unittest/*.py"

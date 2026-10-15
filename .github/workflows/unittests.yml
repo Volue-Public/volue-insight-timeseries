@@ -46,15 +46,14 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ matrix.libraries-versions }}-${{ hashFiles('**/requirements.txt', '**/test-requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ matrix.libraries-versions }}-${{ hashFiles('**/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ matrix.libraries-versions }}-
             ${{ runner.os }}-pip-${{ matrix.python-version }}-
 
       - name: Install dependencies ${{ matrix.python-version }}
         run: |
-          REQS="-r requirements.txt -r test-requirements.txt"
-          pip install --upgrade --upgrade-strategy eager ${REQS}
+          pip install --upgrade --upgrade-strategy eager -e ".[test]"
           pip install ${{ matrix.libraries-versions }}
 
       - name: Run tests
