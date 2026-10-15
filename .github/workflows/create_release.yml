@@ -11,6 +11,11 @@ on:
           - minor
           - major
           - patch
+      prerelease:
+        description: "Create a release candidate (X.Y.ZrcN) instead of a final release"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   tag-release:
@@ -23,15 +28,42 @@ jobs:
     steps:
       - name: Validate version
         shell: bash
+        env:
+          BUMP: ${{ inputs.version_bump }}
         run: |
-          if [[ ! "${{ github.event.inputs.version_bump }}" =~ ^(major|minor|patch)$ ]]; then
-            echo "Invalid value: $v" >&2
+          if [[ ! "${BUMP}" =~ ^(major|minor|patch)$ ]]; then
+            echo "Invalid value: ${BUMP}" >&2
             exit 1
           fi
 
+      # Final release: creates the tag and the GitHub release.
+      # Release candidate: dry run that only computes the next version; the
+      # step below creates the rc tag and a GitHub pre-release from it.
       - uses: rymndhng/release-on-push-action@aebba2bbce07a9474bf95e8710e5ee8a9e922fe2 # v0.28.0
         id: tag-release
         with:
-          bump_version_scheme: ${{ github.event.inputs.version_bump }}
+          bump_version_scheme: ${{ inputs.version_bump }}
           use_github_release_notes: true
           tag_prefix: ""
+          dry_run: ${{ inputs.prerelease }}
+
+      - name: Create release candidate
+        if: ${{ inputs.prerelease }}
+        shell: bash
+        env:
+          NEXT_VERSION: ${{ steps.tag-release.outputs.tag_name }}
+        run: |
+          set -euo pipefail
+          if [[ ! "${NEXT_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Release action returned no usable version: \"${NEXT_VERSION}\"" >&2
+            exit 1
+          fi
+          # The action ignores pre-releases when it looks up the latest release,
+          # so NEXT_VERSION is the next stable version. Number the rc after the
+          # highest existing rc tag for that version.
+          last=$(gh api "repos/${GITHUB_REPOSITORY}/git/matching-refs/tags/${NEXT_VERSION}rc" \
+                   --jq '[.[].ref | capture("rc(?<n>[0-9]+)$").n | tonumber] | max // 0')
+          tag="${NEXT_VERSION}rc$((last + 1))"
+          echo "Creating pre-release ${tag} at ${GITHUB_SHA}"
+          gh release create "${tag}" --repo "${GITHUB_REPOSITORY}" --target "${GITHUB_SHA}" \
+            --title "${tag}" --prerelease --generate-notes
