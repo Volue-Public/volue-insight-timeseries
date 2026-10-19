@@ -40,5 +40,5 @@ setup(
     package_data={'volue_insight_timeseries': ['VERSION']},
     author='Volue Insight',
     author_email='df.support@volue.com',
-    url='https://www.volueinsight.com'
+    url='https://www.volue.com/data-and-forecasts'
 )
