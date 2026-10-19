@@ -6,7 +6,6 @@ import requests_mock
 import volue_insight_timeseries as vit
 
 prefix = 'rtsp://test.host/api/v1/timeseries'
-old_prefix = 'rtsp://test.host/api'
 authprefix = 'rtsp://auth.host/oauth2'
 
 
@@ -71,7 +70,7 @@ def ts_curve(session):
     metadata = {'id': 5, 'name': 'testcurve5',
                 'frequency': 'H', 'time_zone': 'CET',
                 'curve_type': 'TIME_SERIES'}
-    m.register_uri('GET', old_prefix + '/curves/get?name=testcurve5', text=json.dumps(metadata))
+    m.register_uri('GET', prefix + '/curves/get?name=testcurve5', text=json.dumps(metadata))
     c = s.get_curve(name='testcurve5')
     return c,s,m
 
@@ -98,7 +97,7 @@ def tagged_curve(session):
     metadata = {'id': 9, 'name': 'testcurve9',
                 'frequency': 'H', 'time_zone': 'CET',
                 'curve_type': 'TAGGED'}
-    m.register_uri('GET', old_prefix + '/curves/get?name=testcurve9', text=json.dumps(metadata))
+    m.register_uri('GET', prefix + '/curves/get?name=testcurve9', text=json.dumps(metadata))
     c = s.get_curve(name='testcurve9')
     return c,s,m
 
@@ -133,7 +132,7 @@ def inst_curve(session):
     metadata = {'id': 7, 'name': 'testcurve7',
                 'frequency': 'D', 'time_zone': 'CET',
                 'curve_type': 'INSTANCES'}
-    m.register_uri('GET', old_prefix + '/curves/get?name=testcurve7', text=json.dumps(metadata))
+    m.register_uri('GET', prefix + '/curves/get?name=testcurve7', text=json.dumps(metadata))
     c = s.get_curve(name='testcurve7')
     return c,s,m
 
@@ -217,7 +216,7 @@ def tagged_inst_curve(session):
     metadata = {'id': 10, 'name': 'testcurve10',
                 'frequency': 'D', 'time_zone': 'CET',
                 'curve_type': 'TAGGED_INSTANCES'}
-    m.register_uri('GET', old_prefix + '/curves/get?name=testcurve10', text=json.dumps(metadata))
+    m.register_uri('GET', prefix + '/curves/get?name=testcurve10', text=json.dumps(metadata))
     c = s.get_curve(name='testcurve10')
     return c,s,m
 
@@ -310,7 +309,7 @@ def test_deprecated_curve(session):
     metadata = {'id': 400, 'name': 'deprecatedCurve',
                 'frequency': 'H', 'time_zone': 'CET',
                 'curve_type': 'TIME_SERIES', 'curve_state': 'DEPRECATED'}
-    m.register_uri('GET', old_prefix + '/curves/get?name=deprecatedCurve', text=json.dumps(metadata))
+    m.register_uri('GET', prefix + '/curves/get?name=deprecatedCurve', text=json.dumps(metadata))
     with warnings.catch_warnings(record=True) as warning:
         s.get_curve(name="deprecatedCurve")
     assert len(warning) == 1
@@ -322,7 +321,7 @@ def test_not_deprecated_curve(session):
     metadata = {'id': 500, 'name': 'NotDeprecatedCurve',
                 'frequency': 'H', 'time_zone': 'CET',
                 'curve_type': 'TIME_SERIES', 'curve_state': 'INTERNAL'}
-    m.register_uri('GET', old_prefix + '/curves/get?name=NotDeprecatedCurve', text=json.dumps(metadata))
+    m.register_uri('GET', prefix + '/curves/get?name=NotDeprecatedCurve', text=json.dumps(metadata))
     with warnings.catch_warnings(record=True) as warning:
         s.get_curve(name="NotDeprecatedCurve")
     assert len(warning) == 0

@@ -145,8 +145,7 @@ class Session(object):
             arg = util.make_arg('id', id)
         else:
             arg = util.make_arg('name', name)
-        # TODO DFAZM-294: Move to /api/v1/timeseries/... .
-        response = self.data_request('GET', self.urlbase, '/api/curves/get?{}'.format(arg))
+        response = self.data_request('GET', self.urlbase, '/api/v1/timeseries/curves/get?{}'.format(arg))
         return self.handle_single_curve_response(response)
 
     def search(self, query=None, id=None, name=None, commodity=None, category=None, area=None, station=None,
