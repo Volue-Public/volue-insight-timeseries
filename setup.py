@@ -39,6 +39,6 @@ setup(
     long_description='This library is meant as a simple toolkit for working with data from https://api.data-forecasts.volue.com/ (or equivalent services).  Note that access is based on some sort of login credentials, this library is not all that useful unless you have a valid Volue Insight account.',
     package_data={'volue_insight_timeseries': ['VERSION']},
     author='Volue Insight',
-    author_email='support.insight@volue.com',
-    url='https://www.volueinsight.com'
+    author_email='df.support@volue.com',
+    url='https://www.volue.com/data-and-forecasts'
 )
