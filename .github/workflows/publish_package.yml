@@ -17,6 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -31,19 +32,29 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          git checkout main
-          # The newest release (final or rc) is the one "Create Release" just
-          # made. Resolve it by release rather than `git describe`, which is
-          # ambiguous when an rc tag and the final tag sit on the same commit.
-          tag_name=$(gh release list --repo "${GITHUB_REPOSITORY}" --limit 1 --json tagName --jq '.[0].tagName')
-          tag_sha=$(git rev-parse "${tag_name}^{commit}")
-          if [[ "${tag_sha}" != "$(git rev-parse HEAD)" ]]; then
-            echo "Newest release ${tag_name} is at ${tag_sha}, not at the checked-out main HEAD" >&2
+          # The checked-out commit is the one "Create Release" tagged. Pick the
+          # newest release pointing at it; when an rc and the final release
+          # share a commit, the newest is the one that run created. Drafts are
+          # excluded because their tag does not exist yet.
+          head_sha=$(git rev-parse HEAD)
+          # Captured first so a gh failure aborts here instead of being
+          # swallowed by a process substitution.
+          candidates=$(gh release list --repo "${GITHUB_REPOSITORY}" --exclude-drafts --json tagName --jq '.[].tagName')
+          tag_name=""
+          while read -r candidate; do
+            [[ -n "${candidate}" ]] || continue
+            candidate_sha=$(git rev-parse --verify --quiet "${candidate}^{commit}" || true)
+            if [[ "${candidate_sha}" == "${head_sha}" ]]; then
+              tag_name="${candidate}"
+              break
+            fi
+          done <<< "${candidates}"
+          if [[ -z "${tag_name}" ]]; then
+            echo "No release points at the checked-out commit ${head_sha}" >&2
             exit 1
           fi
-          version=${tag_name#v}
-          echo "$version" > volue_insight_timeseries/VERSION
-          echo "VERSION=$version" >> "$GITHUB_OUTPUT"
+          echo "${tag_name}" > volue_insight_timeseries/VERSION
+          echo "VERSION=${tag_name}" >> "$GITHUB_OUTPUT"
 
       - name: Build dist
         id: build-dist

@@ -11,11 +11,21 @@ on:
           - minor
           - major
           - patch
-      prerelease:
-        description: "Create a release candidate (X.Y.ZrcN) instead of a final release"
-        required: false
-        type: boolean
-        default: false
+      release_type:
+        description: "final: tag and publish X.Y.Z from main. rc: publish a release candidate X.Y.ZrcN as a pre-release, from any branch"
+        required: true
+        type: choice
+        default: final
+        options:
+          - final
+          - rc
+
+# One release run at a time, so two dispatches never compute the same rc
+# number. Publish Package is deliberately not in this group: a group holds
+# only one pending run, and a new dispatch would cancel a waiting publish.
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   tag-release:
@@ -26,13 +36,24 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Validate version
+      - name: Validate inputs
         shell: bash
         env:
           BUMP: ${{ inputs.version_bump }}
+          RELEASE_TYPE: ${{ inputs.release_type }}
         run: |
           if [[ ! "${BUMP}" =~ ^(major|minor|patch)$ ]]; then
             echo "Invalid value: ${BUMP}" >&2
+            exit 1
+          fi
+          if [[ ! "${RELEASE_TYPE}" =~ ^(final|rc)$ ]]; then
+            echo "Invalid release type: ${RELEASE_TYPE}" >&2
+            exit 1
+          fi
+          # Final releases are tagged and published from main only; release
+          # candidates may be built from any branch.
+          if [[ "${RELEASE_TYPE}" == "final" && "${GITHUB_REF}" != "refs/heads/main" ]]; then
+            echo "Final releases must be created from main, not ${GITHUB_REF}" >&2
             exit 1
           fi
 
@@ -45,10 +66,10 @@ jobs:
           bump_version_scheme: ${{ inputs.version_bump }}
           use_github_release_notes: true
           tag_prefix: ""
-          dry_run: ${{ inputs.prerelease }}
+          dry_run: ${{ inputs.release_type == 'rc' }}
 
       - name: Create release candidate
-        if: ${{ inputs.prerelease }}
+        if: ${{ inputs.release_type == 'rc' }}
         shell: bash
         env:
           NEXT_VERSION: ${{ steps.tag-release.outputs.tag_name }}
@@ -64,6 +85,14 @@ jobs:
           last=$(gh api "repos/${GITHUB_REPOSITORY}/git/matching-refs/tags/${NEXT_VERSION}rc" \
                    --jq '[.[].ref | capture("rc(?<n>[0-9]+)$").n | tonumber] | max // 0')
           tag="${NEXT_VERSION}rc$((last + 1))"
+          # Without a start tag, rc2 and later would only list changes since the
+          # previous rc; starting from the latest stable release makes every rc
+          # list everything that will be in X.Y.Z.
+          latest_stable=$(gh release list --repo "${GITHUB_REPOSITORY}" --exclude-drafts --exclude-pre-releases --limit 1 --json tagName --jq '.[0].tagName // empty')
+          notes_args=()
+          if [[ -n "${latest_stable}" ]]; then
+            notes_args+=(--notes-start-tag "${latest_stable}")
+          fi
           echo "Creating pre-release ${tag} at ${GITHUB_SHA}"
           gh release create "${tag}" --repo "${GITHUB_REPOSITORY}" --target "${GITHUB_SHA}" \
-            --title "${tag}" --prerelease --generate-notes
+            --title "${tag}" --prerelease --generate-notes "${notes_args[@]}"
