@@ -2,7 +2,7 @@
 This example fetches an absolute forecast from a TAGGED_INSTANCE curve that contains our intraday price forecast.
 The absolute forecast follows updates of our intraday price forecast for a specific hourly contract.
 Have a look at the documentation for further information:
-https://wattsight-volue-insight-timeseries.readthedocs-hosted.com/en/latest/
+https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/guides/curves#tagged_instances
 """
 
 import volue_insight_timeseries
@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 ############################################
 # Insert the path to your config file here!
 my_config_file = 'path/to/your/config.ini'
-# Create a session to connect to Volue Insight API.
+# Create a session to connect to Volue Data & Forecasts API.
 session = volue_insight_timeseries.Session(config_file=my_config_file)
 # or
 #session = volue_insight_timeseries.Session(client_id='client id', client_secret='client secret')

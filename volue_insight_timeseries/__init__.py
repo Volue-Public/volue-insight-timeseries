@@ -1,5 +1,5 @@
 #
-# Volue Insight API access library
+# Volue Data & Forecasts API access library
 #
 
 import os

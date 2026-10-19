@@ -14,7 +14,7 @@ import os
 my_config_file = 'path/to/your/config.ini'
 ############################################
 
-# Create a session to Connect to Volue Insight API
+# Create a session to Connect to Volue Data & Forecasts API
 session = volue_insight_timeseries.Session(config_file=my_config_file)
 
 # get the directory of the current file

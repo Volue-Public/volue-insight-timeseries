@@ -44,7 +44,7 @@ if not os.path.isdir(data_dir):
     # if not, create one
     os.mkdir(data_dir)
 
-# Create a session to Connect to Volue Insight API
+# Create a session to Connect to Volue Data & Forecasts API
 session = volue_insight_timeseries.Session(config_file=my_config_file)
 
 # loop through the given curves

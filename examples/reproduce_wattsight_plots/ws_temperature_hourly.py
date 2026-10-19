@@ -1,6 +1,6 @@
 """
 This example shows how to reproduce temperature forecast plot for any region:
-https://app.wattsight.com/#tab/power/245/2
+https://app.volueinsight.com/#tab/power/245/2
 """
 
 import volue_insight_timeseries
@@ -16,7 +16,7 @@ my_config_file = 'path/to/your/config.ini'
 
 # Choose one of the available regions by using its abbreviation
 # as shown on the top of the wattsight page
-# https://app.wattsight.com/#tab/power/245/2
+# https://app.volueinsight.com/#tab/power/245/2
 region = 'de'
 
 # Set the aggregation function ['AVERAGE','SUM'] and output frequency of the
@@ -43,7 +43,7 @@ func = 'AVERAGE'
 ## Get the data
 ###############
 
-# Create a session to Connect to Volue Insight API
+# Create a session to Connect to Volue Data & Forecasts API
 session = volue_insight_timeseries.Session(config_file=my_config_file)
 
 # get current dates and timeranges to get data
