@@ -3,7 +3,7 @@ This simple example reads data from an TIME_SERIES curve and aggregates it
 using pandas.
 This example shows the same results as the TIME_SERIES aggregation
 example, where the data is aggregated in the backend:
-https://github.com/volueinsight/volue-insight-timeseries/blob/master/examples/Timeseries_curve_examples/ts_aggregation.py
+https://github.com/Volue-Public/volue-insight-timeseries/blob/master/examples/Timeseries_curve_examples/ts_aggregation.py
 Have a look at the pandas documentation for further information:
 https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/
 """
@@ -17,7 +17,7 @@ my_config_file = 'path/to/your/config.ini'
 ############################################
 
 
-# Create a session to Connect to Volue Insight API
+# Create a session to Connect to Volue Data & Forecasts API
 session = volue_insight_timeseries.Session(config_file=my_config_file)
 
 # Define start and end time

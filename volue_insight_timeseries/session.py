@@ -36,7 +36,7 @@ class Session(object):
     suthentication information either directly by using a ```client_id` and
     ``client_secret`` or using a ``config_file`` .
 
-    See https://api.volueinsight.com/#documentation for information how to get
+    See https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/getting-started/connection for information how to get
     your authentication data.
 
     Parameters

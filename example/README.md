@@ -1,15 +1,15 @@
-# Volue Insight API python library usage example
-An introductory example of using Volue Insight API python library for searching, fetching, and plotting Volue Insight data series.
+# Volue Data & Forecasts API python library usage example
+An introductory example of using Volue Data & Forecasts API python library for searching, fetching, and plotting Volue Data & Forecasts data series.
 A number of use cases is presented in order to introduce different data structures.
 
 ## Dependencies
 
-[Volue Insight API python library](https://github.com/wattsight/volue-insight-timeseries/)   
+[Volue Data & Forecasts API python library](https://github.com/Volue-Public/volue-insight-timeseries/)   
 [Jupyter (iPython) Notebooks](http://jupyter.org/)   
 [Pandas Data Analysis library](http://pandas.pydata.org/)   
 [Plotly Charting library](https://plot.ly/)   
 
-## Installation of Volue Insight API python library
+## Installation of Volue Data & Forecasts API python library
 
 1. Using pip
 

@@ -2,7 +2,7 @@
 This example fetches a relative forecast from an INSTANCE curve that contains our forecast for wind
 production based on the ec00 weather forecast. A relative forecast is a conjunction of fragments of 
 selected instances. Have a look at the documentation for further information:
-https://wattsight.com/docs/api/api-absolute-relative-forecast.html?highlight=relative
+https://volueinsight.com/docs/api/api-absolute-relative-forecast.html#relative-forecast
 """
 
 import volue_insight_timeseries
@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 ############################################
 # Insert the path to your config file here!
 my_config_file = 'path/to/your/config.ini'
-# Create a session to connect to Volue Insight API.
+# Create a session to connect to Volue Data & Forecasts API.
 session = volue_insight_timeseries.Session(config_file=my_config_file)
 # or
 #session = volue_insight_timeseries.Session(client_id='client id', client_secret='client secret')
