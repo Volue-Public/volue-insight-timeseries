@@ -17,7 +17,7 @@ my_config_file = 'path/to/your/config.ini'
 region = 'de'
 ############################################
 
-# Create a session to Connect to Volue Insight API
+# Create a session to Connect to Volue Data & Forecasts API
 session = volue_insight_timeseries.Session(config_file=my_config_file)
 
 # Define yesterday

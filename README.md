@@ -1,9 +1,9 @@
 # volue-insight-timeseries
-Volue Insight API python library for working with timeseries.
+Volue Data & Forecasts API python library for working with timeseries.
 
 This library is meant as a simple toolkit for working with data from
-https://api.data-forecasts.volue.com/ (or equivalent services). Note that access
-is based on having a valid Volue Insight account. To get a trial account,
+https://api.volueinsight.com/ (or equivalent services). Note that access
+is based on having a valid Volue Data & Forecasts account. To get a trial account,
 use the "Get in touch" form at https://www.volue.com/data-and-forecasts.
 
 The library is tested against Python 3.11, 3.12, 3.13 and 3.14. Please only use either of these python versions.
@@ -23,7 +23,7 @@ https://github.com/Volue/sirius-core-py-docs
 
 ## Installation
 
-You can simply install/update the latest version of Volue Insight API python
+You can simply install/update the latest version of Volue Data & Forecasts API python
 library with pip.
 Start a terminal (a shell) and use the following command
 
@@ -47,7 +47,7 @@ volue-insight-timeseries # Bad - Unpinned, may break on updates
 
 We follow [Semantic Versioning](https://semver.org/spec/v2.0.0-rc.2.html)
 principles to communicate the type of change from one version to the next,
-together with [release notes](https://github.com/volueinsight/volue-insight-timeseries/releases).
+together with [release notes](https://github.com/Volue-Public/volue-insight-timeseries/releases).
 
 ## Migrating from wapi-python
 If you previously have used wapi-python, you should switch to use this package

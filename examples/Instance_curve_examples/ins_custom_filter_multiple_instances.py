@@ -21,7 +21,7 @@ from volue_insight_timeseries.curves import InstanceCurve
 # Insert the path to your config file here!
 my_config_file = 'path/to/your/config.ini'
 
-# Create a session to Connect to Volue Insight API
+# Create a session to Connect to Volue Data & Forecasts API
 session = Session(config_file=my_config_file)
 
 

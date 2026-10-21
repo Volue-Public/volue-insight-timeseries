@@ -12,7 +12,7 @@ my_config_file = 'path/to/your/config.ini'
 ############################################
 
 
-# Create a session to connect to Volue Insight API
+# Create a session to connect to Volue Data & Forecasts API
 session = vit.Session(config_file=my_config_file)
 
 

@@ -10,7 +10,7 @@ benchmark forecast for each release (each 15 min).
 
 
 Used libraries:
-volue_insight_timeseries: A library from volue used to access Volue Insight's API. To install, run: pip install
+volue_insight_timeseries: A library from volue used to access the Volue Data & Forecasts API. To install, run: pip install
 volue-insight-timeseries.
 pandas:                   A python library used to handle data. To install, run pip install pandas
 os:                       Functionalities for interacting with the operating system. This is a standard python library,
@@ -103,11 +103,11 @@ def get_input_data(
 
 def getkey() -> Session:
     """This function configures Session from volue_insight_timeseries with local environment variable "WAPI_INI_READ"
-    to allow for connection to Volue Insight's API.
+    to allow for connection to the Volue Data & Forecasts API.
 
     Returns:
         session (volue_insight_timeseries.session.Session): A session object that can
-        communicate with Volue Insight's API.
+        communicate with the Volue Data & Forecasts API.
     """
 
     config = os.getenv("WAPI_INI_READ")
@@ -118,7 +118,7 @@ def getkey() -> Session:
 def get_instance_curve(session: Session, curve_name: str, issue_date: str) -> pd.Series:
     """This function retrieves the instance curve released at the determined issue date.
     Args:
-    session: Session object to interact with Volue Insight's API.
+    session: Session object to interact with the Volue Data & Forecasts API.
     curve_name: The name of the curve that is to be retrieved as an instance curve.
     issue_date: The user defined date of issue for the instance curve.
 
@@ -142,7 +142,7 @@ def get_absolute_curve(
 
     Args:
         data_time: The timestamp of the forecasted value.
-        session: Session object to interact with Volue Insight's API.
+        session: Session object to interact with the Volue Data & Forecasts API.
         curve_name: The name of the curve that is to be retrieved as an absolute curve.
         delta_hours: A value that defines how many hours back from the timestamp of data_time to retrieve data.
 
@@ -170,7 +170,7 @@ def get_instance_data(
 
     Args:
         instance_curves_names: A dictionary containing all instance curve names (the benchmark curves).
-        session: Session object to interact with Volue Insight's API.
+        session: Session object to interact with the Volue Data & Forecasts API.
         issue_date: The user defined date of issue for the instance curve.
 
 
@@ -198,7 +198,7 @@ def get_absolute_data(
 
     Args:
         absolute_curves_names: A dictionary containing all absolute curve names (the intraday curves).
-        session: Session object to interact with Volue Insight's API..
+        session: Session object to interact with the Volue Data & Forecasts API.
         data_time: The timestamp of the forecasted value.
         time_delta: Defines how many hours of the intraday curve that is to be retrieved.
 
