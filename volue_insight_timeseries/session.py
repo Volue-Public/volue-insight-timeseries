@@ -16,7 +16,7 @@ from .util import CurveException
 RETRY_COUNT = 4    # Number of times to retry
 RETRY_DELAY = 0.5  # Delay between retried calls, in seconds.
 TIMEOUT = 300      # Default timeout for web calls, in seconds.
-API_URLBASE = 'https://api.data-forecasts.volue.com'
+API_URLBASE = 'https://data-forecasts.volue.com'
 AUTH_URLBASE = 'https://auth.volueinsight.com'
 
 

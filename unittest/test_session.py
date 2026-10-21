@@ -18,7 +18,7 @@ class MockResponse:
         
 
 def make_vit_session() -> vit.Session:
-    return vit.session.Session(urlbase='https://api.data-forecasts.volue.com',
+    return vit.session.Session(urlbase='https://data-forecasts.volue.com',
                                 auth_urlbase='https://auth.vs.com',
                                 client_id='client1',
                                 client_secret='secret1')
@@ -67,7 +67,7 @@ def test_data_request__token_expire__ok(mock_request):
 
 @pytest.mark.parametrize("urlbase,url,longurl_expected", 
     [
-        (None, "/token", "https://api.data-forecasts.volue.com/token"), 
+        (None, "/token", "https://data-forecasts.volue.com/token"), 
         ("http://urlbase", "/token", "http://urlbase/token")
     ])
 @patch('volue_insight_timeseries.session.auth', MagicMock())
@@ -220,7 +220,7 @@ def test_minimal_config_file():
     config_file = os.path.join(os.path.dirname(__file__), 'testconfig_minimal.ini')
     s = vit.Session(config_file=config_file)
     #
-    assert s.urlbase == 'https://api.data-forecasts.volue.com'
+    assert s.urlbase == 'https://data-forecasts.volue.com'
     assert s.auth is None
 
 
