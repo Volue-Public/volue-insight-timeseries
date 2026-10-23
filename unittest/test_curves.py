@@ -5,7 +5,7 @@ import pytest
 import requests_mock
 import volue_insight_timeseries as vit
 
-prefix = 'rtsp://test.host/api'
+prefix = 'rtsp://test.host/api/v1/timeseries'
 authprefix = 'rtsp://auth.host/oauth2'
 
 
@@ -32,10 +32,17 @@ def session():
 
 def test_login_header(session):
     s,m = session
-    m.register_uri('GET', prefix + '/units', text='{"res": "ok"}',
+    m.register_uri('GET', prefix + '/curve-attributes/units', text='{"res": "ok"}',
                    request_headers={'Authorization': '{} {}'.format(s.auth.token_type,
                                                                     s.auth.token)})
     r = s.get_attribute('units')
+    assert r['res'] == 'ok'
+
+
+def test_attribute_path_kebab_case(session):
+    s,m = session
+    m.register_uri('GET', prefix + '/curve-attributes/time-zones', text='{"res": "ok"}')
+    r = s.get_attribute('time_zones')
     assert r['res'] == 'ok'
 
 
@@ -157,7 +164,7 @@ def test_inst_get_instance(inst_curve):
             'name': 'inst_name', 'id': 7,
             'issue_date': '2016-01-01T00:00Z'}
     m.register_uri('GET',
-                   prefix + '/instances/7/get?issue_date=2016-01-01T00:00Z&with_data=true',
+                   prefix + '/instances/7/at?issue_date=2016-01-01T00:00Z&with_data=true',
                    text=json.dumps(inst))
     res = c.get_instance(issue_date='2016-01-01T00:00Z')
     assert isinstance(res, vit.util.TS)
@@ -248,7 +255,7 @@ def test_tagged_inst_get_instance(tagged_inst_curve):
             'name': 'inst_name', 'id': 10, 'tag': 'tag1',
             'issue_date': '2016-01-01T00:00Z'}]
     m.register_uri('GET',
-                   prefix + '/instances/tagged/10/get?tag=tag1&issue_date=2016-01-01T00:00Z&with_data=true',
+                   prefix + '/instances/tagged/10/at?tag=tag1&issue_date=2016-01-01T00:00Z&with_data=true',
                    text=json.dumps(inst))
     res = c.get_instance(tag='tag1', issue_date='2016-01-01T00:00Z')
     assert isinstance(res, vit.util.TS)

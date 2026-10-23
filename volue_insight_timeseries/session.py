@@ -8,20 +8,39 @@ import json
 import time
 import warnings
 import configparser
+import os
 
 from . import auth, curves, events, util
+from .auth import AuthType
 from .util import CurveException
 
 
 RETRY_COUNT = 4    # Number of times to retry
 RETRY_DELAY = 0.5  # Delay between retried calls, in seconds.
 TIMEOUT = 300      # Default timeout for web calls, in seconds.
-API_URLBASE = 'https://api.volueinsight.com'
+API_URLBASE = 'https://data-forecasts.volue.com'
 AUTH_URLBASE = 'https://auth.volueinsight.com'
+VOLUE_IDENTITY_AUTH_URLBASE = 'https://auth.identity.volue.com'
+
+DEFAULT_AUTH_URLBASES = {
+    AuthType.OAUTH: AUTH_URLBASE,
+    AuthType.VOLUE_IDENTITY: VOLUE_IDENTITY_AUTH_URLBASE,
+}
+
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'VERSION')) as fv:
+    USER_AGENT = 'volue-insight-timeseries/{}'.format(fv.read().strip())
 
 
 class ConfigException(Exception):
     pass
+
+
+def _parse_auth_type(auth_type):
+    try:
+        return AuthType(auth_type)
+    except ValueError:
+        raise ConfigException('Unknown auth_type {!r}, expected one of: {}'
+                              .format(auth_type, ', '.join(t.value for t in AuthType))) from None
 
 
 class MetadataException(Exception):
@@ -53,6 +72,9 @@ class Session(object):
         Your client secret.
     auth_urlbase: url
         Location of Wattsight authentication service
+    auth_type: AuthType or str
+        ``AuthType.OAUTH`` / ``'OAuth'`` (default) for Volue Data & Forecasts credentials, or
+        ``AuthType.VOLUE_IDENTITY`` / ``'VolueIdentity'`` for Volue Identity credentials.
     timeout: float
         Timeout for REST calls, in seconds
 
@@ -63,16 +85,17 @@ class Session(object):
     """
 
     def __init__(self, urlbase=None, config_file=None, client_id=None, client_secret=None,
-                 auth_urlbase=None, timeout=None, retry_update_auth=False):
+                 auth_urlbase=None, timeout=None, retry_update_auth=False, auth_type=AuthType.OAUTH):
         self.urlbase = API_URLBASE
         self.auth = None
         self.timeout = TIMEOUT
         self._session = requests.Session()
+        self._session.headers['User-Agent'] = '{} {}'.format(USER_AGENT, requests.utils.default_user_agent())
         self.retry_update_auth = retry_update_auth
         if config_file is not None:
             self.read_config_file(config_file)
         elif client_id is not None and client_secret is not None:
-            self.configure(client_id, client_secret, auth_urlbase)
+            self.configure(client_id, client_secret, auth_urlbase, auth_type)
         if urlbase is not None:
             self.urlbase = urlbase
         if timeout is not None:
@@ -95,22 +118,25 @@ class Session(object):
         if urlbase is not None:
             self.urlbase = urlbase
         auth_type = config.get('common', 'auth_type')
-        if auth_type == 'OAuth':
-            client_id = config.get(auth_type, 'id')
-            client_secret = config.get(auth_type, 'secret')
-            auth_urlbase = config.get(auth_type, 'auth_urlbase', fallback=AUTH_URLBASE)
-            self.auth = auth.OAuth(self, client_id, client_secret, auth_urlbase)
+        if auth_type != 'None':
+            auth_type = _parse_auth_type(auth_type)
+            client_id = config.get(auth_type.value, 'id')
+            client_secret = config.get(auth_type.value, 'secret')
+            auth_urlbase = config.get(auth_type.value, 'auth_urlbase', fallback=None)
+            self.configure(client_id, client_secret, auth_urlbase, auth_type)
         timeout = config.get('common', 'timeout', fallback=None)
         if timeout is not None:
             self.timeout = float(timeout)
 
-    def configure(self, client_id, client_secret, auth_urlbase=None):
+    def configure(self, client_id, client_secret, auth_urlbase=None, auth_type=AuthType.OAUTH):
         """Programmatically set authentication parameters"""
         if self.auth is not None:
             raise ConfigException('Session configuration is already done')
+        auth_type = _parse_auth_type(auth_type)
         if auth_urlbase is None:
-            auth_urlbase = AUTH_URLBASE
-        self.auth = auth.OAuth(self, client_id, client_secret, auth_urlbase)
+            auth_urlbase = DEFAULT_AUTH_URLBASES[auth_type]
+        auth_classes = {AuthType.OAUTH: auth.OAuth, AuthType.VOLUE_IDENTITY: auth.VolueIdentity}
+        self.auth = auth_classes[auth_type](self, client_id, client_secret, auth_urlbase)
 
     def get_curve(self, id=None, name=None):
         """Getting a curve object
@@ -145,7 +171,7 @@ class Session(object):
             arg = util.make_arg('id', id)
         else:
             arg = util.make_arg('name', name)
-        response = self.data_request('GET', self.urlbase, '/api/curves/get?{}'.format(arg))
+        response = self.data_request('GET', self.urlbase, '/api/v1/timeseries/curves/get?{}'.format(arg))
         return self.handle_single_curve_response(response)
 
     def search(self, query=None, id=None, name=None, commodity=None, category=None, area=None, station=None,
@@ -291,7 +317,7 @@ class Session(object):
         if len(args):
             astr = "?{}".format("&".join(args))
         # Now run the search, and try to produce a list of curves
-        response = self.data_request('GET', self.urlbase, '/api/curves{}'.format(astr))
+        response = self.data_request('GET', self.urlbase, '/api/v1/timeseries/curves{}'.format(astr))
         return self.handle_multi_curve_response(response)
 
     def make_curve(self, id, curve_type):
@@ -403,7 +429,7 @@ class Session(object):
         """Get valid values for an attribute."""
         if attribute not in self._attributes:
             raise MetadataException('Attribute {} is not valid'.format(attribute))
-        response = self.data_request('GET', self.urlbase, '/api/{}'.format(attribute))
+        response = self.data_request('GET', self.urlbase, '/api/v1/timeseries/curve-attributes/{}'.format(attribute.replace('_', '-')))
         if response.status_code == 200:
             return response.json()
         elif response.status_code == 204:
@@ -504,6 +530,11 @@ class Session(object):
         """Run a call to the backend, dealing with authentication etc."""
         headers = self._validate_auth(data, rawdata)
         res = self.send_data_request(req_type, urlbase, url, data, rawdata, headers, authval, stream, retries)
+        if res.status_code == 401 and getattr(self.auth, 'auth_type', None) == AuthType.VOLUE_IDENTITY:
+            raise auth.AuthFailedException(
+                'Volue Identity issued a token, but the Volue Data & Forecasts API rejected it (HTTP 401). '
+                'Volue Identity credentials may not be accepted for your account yet: keep using '
+                'your current credentials with auth_type = OAuth until you are told to switch.')
         return res
 
     def handle_single_curve_response(self, response):
