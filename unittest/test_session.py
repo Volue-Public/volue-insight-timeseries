@@ -2,9 +2,11 @@ from unittest.mock import Mock, patch, MagicMock
 import requests_mock
 import pytest
 import requests
+import io
 import os
 import json
 import time
+import warnings
 
 import volue_insight_timeseries as vit
 
@@ -188,6 +190,48 @@ def test_build_sessions():
     s = vit.Session(urlbase ='test_data', timeout=5)
     assert s.urlbase == 'test_data'
     assert s.timeout == 5
+
+
+RETIRED_URLBASE = 'https://api.volueinsight.com'
+
+
+def _retired_config():
+    return io.StringIO('[common]\nurlbase = {}\nauth_type = None\n'.format(RETIRED_URLBASE))
+
+
+def _set_urlbase(session):
+    session.urlbase = RETIRED_URLBASE
+
+
+class _SubSession(vit.Session):
+    def read_config_file(self, config_file):
+        self.urlbase = RETIRED_URLBASE
+
+
+@pytest.mark.parametrize('make_session', [
+    lambda: vit.Session(urlbase=RETIRED_URLBASE),
+    lambda: vit.Session(config_file=_retired_config()),
+    lambda: vit.Session().read_config_file(_retired_config()),
+    lambda: _set_urlbase(vit.Session()),
+    lambda: _SubSession(config_file='unused.ini'),
+], ids=['param', 'config_file', 'read_config_file', 'direct_set', 'subclass'])
+def test_retired_urlbase__warns(make_session):
+    with pytest.warns(FutureWarning, match='api.volueinsight.com') as record:
+        make_session()
+    assert len(record) == 1
+
+
+@pytest.mark.parametrize('host', vit.session.RETIRED_API_HOSTS)
+def test_each_retired_host__warns(host):
+    with pytest.warns(FutureWarning, match=host):
+        vit.Session(urlbase='https://{}'.format(host))
+
+
+@pytest.mark.parametrize('urlbase', [None, 'https://data-forecasts.volue.com', 'https://dev.example'])
+def test_supported_urlbase__no_warning(urlbase):
+    with warnings.catch_warnings():
+        warnings.simplefilter('error', FutureWarning)
+        vit.Session(urlbase=urlbase)
 
 
 def test_configure_by_file():

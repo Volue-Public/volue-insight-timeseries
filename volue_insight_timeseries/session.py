@@ -9,6 +9,7 @@ import time
 import warnings
 import configparser
 import os
+from urllib.parse import urlparse
 
 from . import auth, curves, events, util
 from .auth import AuthType
@@ -21,6 +22,7 @@ TIMEOUT = 300      # Default timeout for web calls, in seconds.
 API_URLBASE = 'https://data-forecasts.volue.com'
 AUTH_URLBASE = 'https://auth.volueinsight.com'
 VOLUE_IDENTITY_AUTH_URLBASE = 'https://auth.identity.volue.com'
+RETIRED_API_HOSTS = ('api.volueinsight.com', 'api.wattsight.com')
 
 DEFAULT_AUTH_URLBASES = {
     AuthType.OAUTH: AUTH_URLBASE,
@@ -100,6 +102,22 @@ class Session(object):
             self.urlbase = urlbase
         if timeout is not None:
             self.timeout = timeout
+
+    @property
+    def urlbase(self):
+        return self._urlbase
+
+    @urlbase.setter
+    def urlbase(self, value):
+        # Every path that sets urlbase passes here, subclasses included.
+        # Warns when the host will be retired. The call still works until then.
+        # The warning points at the line that set urlbase.
+        if value and urlparse(value).hostname in RETIRED_API_HOSTS:
+            warnings.warn(
+                'urlbase {} uses a host that will be retired. Remove urlbase from '
+                'your config, or set it to {}.'.format(value, API_URLBASE),
+                FutureWarning, stacklevel=2)
+        self._urlbase = value
 
     def read_config_file(self, config_file):
         """Set up according to configuration file with hosts and access details"""
