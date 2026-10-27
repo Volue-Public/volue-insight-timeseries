@@ -31,6 +31,28 @@ Start a terminal (a shell) and use the following command
 pip install -U volue-insight-timeseries
 ```
 
+The core library does not install pandas. The following functions need pandas:
+
+- `TS.to_pandas()` and `TS.from_pandas()`
+- `TS.sum()`, `TS.mean()` and `TS.median()`
+- `PairedTS.to_pandas()`
+- `util.tags_to_DF()`
+
+To use them, install the library with the `pandas` extra:
+
+```bash
+pip install -U "volue-insight-timeseries[pandas]"
+```
+
+If pandas is already installed, the plain install is enough. The library needs
+pandas 1.5 or newer. Without the `pandas` extra, pip does not check the pandas
+version, so an older pandas raises an `ImportError` when you call one of these
+functions.
+
+You can use the time series data without pandas. Each `TS` object keeps its
+data in `TS.points`, a list of `[timestamp_ms, value]` pairs. You can load
+this list into any other dataframe library, for example polars.
+
 ### Pin this package
 We strongly recommend to pin your dependency on our package, since we will do
 changes to the package as we introduce new features, fix issues etc. See example
