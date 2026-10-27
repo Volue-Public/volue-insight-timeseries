@@ -61,31 +61,3 @@ jobs:
         run: |
           python -m pytest -vv
 
-  no-pandas:
-    timeout-minutes: 15
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [ '3.11', '3.14' ]
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies without pandas ${{ matrix.python-version }}
-        run: |
-          pip install -r requirements.txt -r test-requirements.txt
-
-      # The core install must not pull pandas or numpy.
-      # If a new dependency pulls pandas, this step fails.
-      - name: Fail if pandas or numpy is installed
-        run: |
-          python -c "import importlib.util as u, sys; sys.exit(any(u.find_spec(m) for m in ('pandas', 'numpy')))"
-
-      # test_util.py imports pandas at module level, so skip it here.
-      - name: Run tests without pandas
-        run: |
-          python -m pytest -vv --ignore=unittest/test_util.py
-

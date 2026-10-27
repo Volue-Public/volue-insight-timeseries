@@ -3,16 +3,13 @@
 # the data from the backend
 #
 
-from __future__ import annotations
-
 import calendar
 import datetime
 import dateutil.parser
+import pandas as pd
+import numpy as np
 import warnings
-from typing import Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    import pandas as pd
+from typing import Optional
 
 try:
     from urllib.parse import quote_plus
@@ -20,19 +17,6 @@ except ImportError:
     from urllib import quote_plus
 from zoneinfo import ZoneInfo
 from zoneinfo._common import ZoneInfoNotFoundError
-
-
-def _require_pandas():
-    # Pandas is an optional extra. Import it only when a pandas function runs.
-    # If pandas is missing, raise ImportError with the install command.
-    try:
-        import pandas
-    except ImportError as e:
-        raise ImportError(
-            "This function needs pandas. Install it with: "
-            "pip install 'volue-insight-timeseries[pandas]'"
-        ) from e
-    return pandas
 
 
 # Curve types
@@ -158,7 +142,6 @@ class TS(object):
         -------
         pandas.Series
         """
-        pd = _require_pandas()
         if name is None:
             name = self.fullname
         if self.points is None or len(self.points) == 0:
@@ -192,9 +175,6 @@ class TS(object):
 
     @staticmethod
     def from_pandas(pd_series):
-        _require_pandas()
-        import numpy as np
-
         # Clean up some of the more common Pandas/api problems
         pd_series = pd_series.astype(np.float64)
         pd_series.replace({np.nan: None}, inplace=True)
@@ -327,7 +307,6 @@ class PairedTS(TS):
             A pandas.DataFrame representing the paired data, with curve metadata
             stored in the `.attrs` dictionary.
         """
-        pd = _require_pandas()
         df = pd.DataFrame(self.points or [], columns=self.tags)
 
         # Curve Metadata in DataFrame attributes
@@ -344,7 +323,6 @@ def _generated_series_to_TS(series, name):
 
 
 def _ts_list_to_dataframe(ts_list):
-    pd = _require_pandas()
     pd_list = []
     for ts in ts_list:
         pd_list.append(ts.to_pandas())
@@ -357,7 +335,6 @@ def tags_to_DF(tagged_list):
     Given a list of tagged series/instances, create a DataFrame with the tag of
     each as column name
     """
-    pd = _require_pandas()
     return pd.DataFrame({s.tag: s.to_pandas() for s in tagged_list})
 
 
