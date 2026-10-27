@@ -8,7 +8,6 @@ from __future__ import annotations
 import calendar
 import datetime
 import dateutil.parser
-import re
 import warnings
 from typing import Optional, TYPE_CHECKING
 
@@ -23,14 +22,9 @@ from zoneinfo import ZoneInfo
 from zoneinfo._common import ZoneInfoNotFoundError
 
 
-_MIN_PANDAS_VERSION = (1, 5)
-
-
 def _require_pandas():
     # Pandas is an optional extra. Import it only when a pandas function runs.
-    # Pip keeps a pandas that is already installed, so check the version here.
-    # If pandas is missing or too old, raise ImportError with the install
-    # command. An unknown version format skips the check.
+    # If pandas is missing, raise ImportError with the install command.
     try:
         import pandas
     except ImportError as e:
@@ -38,13 +32,6 @@ def _require_pandas():
             "This function needs pandas. Install it with: "
             "pip install 'volue-insight-timeseries[pandas]'"
         ) from e
-    match = re.match(r"(\d+)\.(\d+)", getattr(pandas, "__version__", ""))
-    if match and tuple(map(int, match.groups())) < _MIN_PANDAS_VERSION:
-        raise ImportError(
-            "This function needs pandas>=1.5, but pandas "
-            f"{pandas.__version__} is installed. Upgrade it with: "
-            "pip install -U 'volue-insight-timeseries[pandas]'"
-        )
     return pandas
 
 

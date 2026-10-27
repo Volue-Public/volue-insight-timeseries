@@ -1,5 +1,4 @@
 import sys
-import types
 
 import pytest
 
@@ -12,29 +11,6 @@ INSTALL_HINT = r"volue-insight-timeseries\[pandas\]"
 def no_pandas(monkeypatch):
     # A None entry in sys.modules makes "import pandas" raise ImportError.
     monkeypatch.setitem(sys.modules, "pandas", None)
-
-
-def _fake_pandas(monkeypatch, version):
-    # "import pandas" returns this module because sys.modules has it.
-    fake = types.ModuleType("pandas")
-    fake.__version__ = version
-    monkeypatch.setitem(sys.modules, "pandas", fake)
-    return fake
-
-
-@pytest.mark.parametrize("version", ["1.3.5", "1.4.4", "0.25.3"])
-def test_old_pandas_raises_upgrade_hint(monkeypatch, version):
-    _fake_pandas(monkeypatch, version)
-    with pytest.raises(ImportError, match=f"pandas {version} is installed"):
-        util._require_pandas()
-
-
-@pytest.mark.parametrize(
-    "version", ["1.5.0", "2.2.0rc0", "3.1.0", "3.0.0.dev0+12.gabc", "unknown"]
-)
-def test_supported_pandas_passes(monkeypatch, version):
-    fake = _fake_pandas(monkeypatch, version)
-    assert util._require_pandas() is fake
 
 
 def _ts():
