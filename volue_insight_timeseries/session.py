@@ -11,7 +11,7 @@ import configparser
 import os
 from urllib.parse import urlparse
 
-from . import auth, curves, events, util
+from . import auth, curves, events, retry, util
 from .auth import AuthType
 from .util import CurveException
 
@@ -79,6 +79,16 @@ class Session(object):
         ``AuthType.VOLUE_IDENTITY`` / ``'VolueIdentity'`` for Volue Identity credentials.
     timeout: float
         Timeout for REST calls, in seconds
+    requests_session: requests.Session
+        Your own ``requests.Session``, for proxies, CA bundles, client
+        certificates or connection pool size. All requests, authentication
+        included, are sent through it.
+    retries: int or urllib3.util.Retry
+        By default, a request that timed out, failed to connect or got a 408
+        or 5xx response is retried 4 times, with 0.5 seconds between attempts.
+        Pass an int to change the number, or a ``urllib3.util.Retry`` for other
+        rules, such as backoff. If ``requests_session`` already retries
+        through its adapters, pass 0 so requests are not retried twice.
 
     Returns
     -------
@@ -87,11 +97,18 @@ class Session(object):
     """
 
     def __init__(self, urlbase=None, config_file=None, client_id=None, client_secret=None,
-                 auth_urlbase=None, timeout=None, retry_update_auth=False, auth_type=AuthType.OAUTH):
+                 auth_urlbase=None, timeout=None, retry_update_auth=False, auth_type=AuthType.OAUTH,
+                 requests_session=None, retries=None):
         self.urlbase = API_URLBASE
         self.auth = None
         self.timeout = TIMEOUT
-        self._session = requests.Session()
+        self._retries = retry.make_retry(RETRY_COUNT if retries is None else retries, RETRY_DELAY)
+        if requests_session is None:
+            requests_session = requests.Session()
+        elif not isinstance(requests_session, requests.Session):
+            raise TypeError('requests_session must be a requests.Session, not {}'
+                            .format(type(requests_session).__name__))
+        self._session = requests_session
         self._session.headers['User-Agent'] = '{} {}'.format(USER_AGENT, requests.utils.default_user_agent())
         self.retry_update_auth = retry_update_auth
         if config_file is not None:
@@ -515,7 +532,7 @@ class Session(object):
         return headers
     
     def send_data_request(self, req_type, urlbase, url, data=None, rawdata=None, headers=None, authval=None,
-                     stream=False, retries=RETRY_COUNT):
+                     stream=False, retries=None):
         if not urlbase:
             urlbase = self.urlbase
         longurl = urljoin(urlbase, url)
@@ -528,23 +545,15 @@ class Session(object):
                 databytes = json.dumps(data).encode()
         if data is None and rawdata is not None:
             databytes = rawdata
-        timeout = None
-        try:
-            res = self._session.request(method=req_type, url=longurl, data=databytes,
-                                        headers=headers, auth=authval, stream=stream, timeout=self.timeout)
-        except requests.exceptions.Timeout as e:
-            timeout = e
-            res = None
-        if (timeout is not None or (500 <= res.status_code < 600) or res.status_code == 408) and retries > 0:
-            if RETRY_DELAY > 0:
-                time.sleep(RETRY_DELAY)
-            return self.send_data_request(req_type, urlbase, url, data, rawdata, headers, authval, stream, retries-1)
-        if timeout is not None:
-            raise timeout
-        return res
+        retry_setting = retry.make_retry(retries, RETRY_DELAY)
+        if retry_setting is None:
+            retry_setting = self._retries
+        return retry.request_with_retries(http_session=self._session, retry_state=retry_setting,
+                                          method=req_type, url=longurl, data=databytes, headers=headers,
+                                          auth=authval, stream=stream, timeout=self.timeout)
 
     def data_request(self, req_type, urlbase, url, data=None, rawdata=None, authval=None,
-                     stream=False, retries=RETRY_COUNT):
+                     stream=False, retries=None):
         """Run a call to the backend, dealing with authentication etc."""
         headers = self._validate_auth(data, rawdata)
         res = self.send_data_request(req_type, urlbase, url, data, rawdata, headers, authval, stream, retries)

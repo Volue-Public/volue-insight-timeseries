@@ -49,6 +49,44 @@ We follow [Semantic Versioning](https://semver.org/spec/v2.0.0-rc.2.html)
 principles to communicate the type of change from one version to the next,
 together with [release notes](https://github.com/Volue-Public/volue-insight-timeseries/releases).
 
+## Connection settings
+
+### Your own requests session
+Pass your own `requests.Session` when you need a proxy, a CA bundle, a client
+certificate or a larger connection pool, and cannot set them through
+environment variables such as `HTTPS_PROXY` or `REQUESTS_CA_BUNDLE`. All
+requests, authentication included, are sent through it.
+
+```python
+import requests
+import volue_insight_timeseries as vit
+
+http_session = requests.Session()
+http_session.proxies = {'https': 'http://proxy.example.com:8080'}
+http_session.verify = '/path/to/ca-bundle.pem'
+
+session = vit.Session(config_file='config.ini', requests_session=http_session)
+```
+
+### Retries
+By default, a request that times out, fails to connect or gets a 408 or 5xx
+response is retried 4 times, with 0.5 seconds between attempts. Change the
+number with `retries`, or pass a urllib3 `Retry` for other rules, such as
+backoff:
+
+```python
+from urllib3.util import Retry
+
+session = vit.Session(config_file='config.ini', retries=2)
+session = vit.Session(config_file='config.ini',
+                      retries=Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504],
+                                    allowed_methods=None, raise_on_status=False))
+```
+
+`retries=0` turns retries off. Use it when your `requests_session` already
+retries through a urllib3 `Retry` on its adapters, or requests are retried at
+both levels.
+
 ## Migrating from wapi-python
 If you previously have used wapi-python, you should switch to use this package
 going forward. We will not add any new features to wapi-python, it is only in 

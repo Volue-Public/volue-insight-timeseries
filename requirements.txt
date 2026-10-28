@@ -1,4 +1,5 @@
 requests>=2.18
+urllib3>=1.26
 sseclient-py>=1.7
 pandas>=1.5.0; python_version == "3.11"
 pandas>=2.1.1; python_version == "3.12"

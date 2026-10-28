@@ -4,7 +4,7 @@
 
 import os
 from .session import Session
-from . import auth, curves, events, session, util
+from . import auth, curves, events, retry, session, util
 
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'VERSION')) as fv:
