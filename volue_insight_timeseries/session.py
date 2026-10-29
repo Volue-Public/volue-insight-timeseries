@@ -98,11 +98,13 @@ class Session(object):
 
     def __init__(self, urlbase=None, config_file=None, client_id=None, client_secret=None,
                  auth_urlbase=None, timeout=None, retry_update_auth=False, auth_type=AuthType.OAUTH,
-                 requests_session=None, retries=None):
+                 requests_session=None, retries=RETRY_COUNT):
         self.urlbase = API_URLBASE
         self.auth = None
         self.timeout = TIMEOUT
-        self._retries = retry.make_retry(RETRY_COUNT if retries is None else retries, RETRY_DELAY)
+        if retries is None:
+            raise TypeError('retries must be an int or a urllib3 Retry, not NoneType')
+        self._retries = retry.make_retry(retries, RETRY_DELAY)
         if requests_session is None:
             requests_session = requests.Session()
         elif not isinstance(requests_session, requests.Session):

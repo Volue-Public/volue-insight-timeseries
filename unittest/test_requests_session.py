@@ -206,7 +206,8 @@ def test_concurrent_calls_keep_their_own_retries(server):
     assert server.hits['/503?default'] == vit.session.RETRY_COUNT + 1
 
 
-@pytest.mark.parametrize('retries,error', [(-1, ValueError), (True, TypeError), ('3', TypeError), (1.5, TypeError)])
+@pytest.mark.parametrize('retries,error', [(-1, ValueError), (None, TypeError), (True, TypeError), ('3', TypeError),
+                                           (1.5, TypeError)])
 def test_invalid_retries(retries, error):
     with pytest.raises(error):
         vit.Session(retries=retries)
