@@ -20,21 +20,33 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.11', '3.12', '3.13', '3.14' ]
-        libraries-versions: [ 'pandas==1.5.2 "numpy<2.0"', 'pandas==2.2.2', 'pandas>=2.2.3', 'pandas>=2.3.3' ]
-        exclude:
+        # Per Python version: the oldest pandas with prebuilt wheels for it,
+        # and the latest pandas pip resolves (already installed by the eager upgrade).
+        include:
+          - python-version: '3.9'
+            libraries-versions: 'pandas==1.5.0 "numpy<2.0"'
+          - python-version: '3.9'
+            libraries-versions: 'pandas'
+          - python-version: '3.10'
+            libraries-versions: 'pandas==1.5.0 "numpy<2.0"'
+          - python-version: '3.10'
+            libraries-versions: 'pandas'
+          - python-version: '3.11'
+            libraries-versions: 'pandas==1.5.0 "numpy<2.0"'
+          - python-version: '3.11'
+            libraries-versions: 'pandas'
           - python-version: '3.12'
-            libraries-versions: 'pandas==1.5.2 "numpy<2.0"'
+            libraries-versions: 'pandas==2.1.1 "numpy<2.0"'
+          - python-version: '3.12'
+            libraries-versions: 'pandas'
           - python-version: '3.13'
-            libraries-versions: 'pandas==1.5.2 "numpy<2.0"'
+            libraries-versions: 'pandas==2.2.3'
           - python-version: '3.13'
-            libraries-versions: 'pandas==2.2.2'
+            libraries-versions: 'pandas'
           - python-version: '3.14'
-            libraries-versions: 'pandas==1.5.2 "numpy<2.0"'
+            libraries-versions: 'pandas==2.3.3'
           - python-version: '3.14'
-            libraries-versions: 'pandas==2.2.2'
-          - python-version: '3.14'
-            libraries-versions: 'pandas>=2.2.3'
+            libraries-versions: 'pandas'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
