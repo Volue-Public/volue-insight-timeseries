@@ -17,16 +17,19 @@ concurrency:
 jobs:
   unittests:
     timeout-minutes: 15
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     strategy:
       matrix:
         # Per Python version: the oldest pandas with prebuilt wheels for it,
         # and the latest pandas pip resolves (already installed by the eager upgrade).
         include:
+          # ubuntu-latest (26.04) has no Python 3.9 build; pin 3.9 to 24.04.
           - python-version: '3.9'
             libraries-versions: 'pandas==1.5.0 "numpy<2.0"'
+            os: ubuntu-24.04
           - python-version: '3.9'
             libraries-versions: 'pandas'
+            os: ubuntu-24.04
           - python-version: '3.10'
             libraries-versions: 'pandas==1.5.0 "numpy<2.0"'
           - python-version: '3.10'
