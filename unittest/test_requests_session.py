@@ -261,14 +261,11 @@ def test_requests_session_sends_auth_data_and_events():
     s = vit.Session(urlbase='rtsp://api', auth_urlbase='rtsp://auth', client_id='id', client_secret='secret',
                     requests_session=http_session)
     s.data_request('GET', None, '/curves')
-    listener = s.events([1])
-    try:
+    with s.events([1]):
         for _ in range(100):
             if any('/events' in r.url for r in adapter.request_history):
                 break
             time.sleep(0.01)
-    finally:
-        listener.close()
 
     urls = [r.url for r in adapter.request_history]
     assert urls[0] == 'rtsp://auth/oauth2/token'
