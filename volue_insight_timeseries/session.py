@@ -22,7 +22,6 @@ TIMEOUT = 300      # Default timeout for web calls, in seconds.
 API_URLBASE = 'https://data-forecasts.volue.com'
 AUTH_URLBASE = 'https://auth.volueinsight.com'
 VOLUE_IDENTITY_AUTH_URLBASE = 'https://auth.identity.volue.com'
-RETIRED_API_HOSTS = ('api.volueinsight.com', 'api.wattsight.com')
 
 DEFAULT_AUTH_URLBASES = {
     AuthType.OAUTH: AUTH_URLBASE,
@@ -129,12 +128,11 @@ class Session(object):
     @urlbase.setter
     def urlbase(self, value):
         # Every path that sets urlbase passes here, subclasses included.
-        # Warns when the host will be retired. The call still works until then.
-        # The warning points at the line that set urlbase.
-        if value and urlparse(value).hostname in RETIRED_API_HOSTS:
+        # Any host other than the API_URLBASE host gives a FutureWarning.
+        if value and urlparse(value).hostname != urlparse(API_URLBASE).hostname:
             warnings.warn(
-                'urlbase {} uses a host that will be retired. Remove urlbase from '
-                'your config, or set it to {}.'.format(value, API_URLBASE),
+                'urlbase {} is not the default host. Other hosts can stop working. '
+                'Remove urlbase from your config, or set it to {}.'.format(value, API_URLBASE),
                 FutureWarning, stacklevel=2)
         self._urlbase = value
 

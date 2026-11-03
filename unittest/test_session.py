@@ -221,13 +221,17 @@ def test_retired_urlbase__warns(make_session):
     assert len(record) == 1
 
 
-@pytest.mark.parametrize('host', vit.session.RETIRED_API_HOSTS)
-def test_each_retired_host__warns(host):
+@pytest.mark.parametrize('host', [
+    'api.volueinsight.com', 'api.wattsight.com', 'api.data-forecasts.volue.com', 'dev.example',
+])
+def test_other_host__warns(host):
     with pytest.warns(FutureWarning, match=host):
         vit.Session(urlbase='https://{}'.format(host))
 
 
-@pytest.mark.parametrize('urlbase', [None, 'https://data-forecasts.volue.com', 'https://dev.example'])
+@pytest.mark.parametrize('urlbase', [
+    None, 'https://data-forecasts.volue.com', 'https://data-forecasts.volue.com/',
+])
 def test_supported_urlbase__no_warning(urlbase):
     with warnings.catch_warnings():
         warnings.simplefilter('error', FutureWarning)
