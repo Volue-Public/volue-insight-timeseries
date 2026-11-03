@@ -153,12 +153,11 @@ class Session(object):
         if urlbase is not None:
             self.urlbase = urlbase
         auth_type = config.get('common', 'auth_type')
-        if auth_type != 'None':
-            auth_type = _parse_auth_type(auth_type)
-            client_id = config.get(auth_type.value, 'id')
-            client_secret = config.get(auth_type.value, 'secret')
-            auth_urlbase = config.get(auth_type.value, 'auth_urlbase', fallback=None)
-            self.configure(client_id, client_secret, auth_urlbase, auth_type)
+        auth_type = _parse_auth_type(auth_type)
+        client_id = config.get(auth_type.value, 'id')
+        client_secret = config.get(auth_type.value, 'secret')
+        auth_urlbase = config.get(auth_type.value, 'auth_urlbase', fallback=None)
+        self.configure(client_id, client_secret, auth_urlbase, auth_type)
         timeout = config.get('common', 'timeout', fallback=None)
         if timeout is not None:
             self.timeout = float(timeout)

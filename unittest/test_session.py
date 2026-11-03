@@ -193,10 +193,13 @@ def test_build_sessions():
 
 
 RETIRED_URLBASE = 'https://api.volueinsight.com'
+OAUTH_TOKEN = json.dumps({'token_type': 'Bearer', 'access_token': 'token', 'expires_in': 3600})
 
 
 def _retired_config():
-    return io.StringIO('[common]\nurlbase = {}\nauth_type = None\n'.format(RETIRED_URLBASE))
+    return io.StringIO('[common]\nurlbase = {}\nauth_type = OAuth\n'
+                       '[OAuth]\nid = clientid\nsecret = verysecret\n'
+                       'auth_urlbase = https://auth.test.host\n'.format(RETIRED_URLBASE))
 
 
 def _set_urlbase(session):
@@ -216,7 +219,9 @@ class _SubSession(vit.Session):
     lambda: _SubSession(config_file='unused.ini'),
 ], ids=['param', 'config_file', 'read_config_file', 'direct_set', 'subclass'])
 def test_retired_urlbase__warns(make_session):
-    with pytest.warns(FutureWarning, match='api.volueinsight.com') as record:
+    with requests_mock.Mocker() as m, \
+            pytest.warns(FutureWarning, match='api.volueinsight.com') as record:
+        m.post(requests_mock.ANY, text=OAUTH_TOKEN)
         make_session()
     assert len(record) == 1
 
@@ -266,10 +271,19 @@ def test_configure_by_file():
 
 def test_minimal_config_file():
     config_file = os.path.join(os.path.dirname(__file__), 'testconfig_minimal.ini')
-    s = vit.Session(config_file=config_file)
+    with requests_mock.Mocker() as m:
+        m.post(requests_mock.ANY, text=OAUTH_TOKEN)
+        s = vit.Session(config_file=config_file)
     #
     assert s.urlbase == 'https://data-forecasts.volue.com'
-    assert s.auth is None
+    assert isinstance(s.auth, vit.auth.OAuth)
+
+
+@pytest.mark.parametrize('auth_type', ['None', 'none', 'KeyAuth'])
+def test_unknown_auth_type_in_config__raises(auth_type):
+    config = io.StringIO('[common]\nauth_type = {}\n'.format(auth_type))
+    with pytest.raises(vit.session.ConfigException, match='Unknown auth_type'):
+        vit.Session(config_file=config)
 
 
 def test_configure_by_param():
