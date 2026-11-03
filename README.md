@@ -6,7 +6,8 @@ https://api.volueinsight.com/ (or equivalent services). Note that access
 is based on having a valid Volue Data & Forecasts account. To get a trial account,
 use the "Get in touch" form at https://www.volue.com/data-and-forecasts.
 
-The library is tested against Python 3.11, 3.12, 3.13 and 3.14. Please only use either of these python versions.
+The library supports Python 3.9 or newer and pandas 1.5.0 or newer. It is tested
+against Python 3.9, 3.10, 3.11, 3.12, 3.13 and 3.14.
 
 
 ## Documentation
@@ -57,8 +58,8 @@ the event of a severe bug that we will do any changes to it.
 These are the steps you will have to do in order to successfully
 make the switch. 
 
-* Use Python 3.11, 3.12, 3.13 or 3.14
-* Use Pandas 1.5.0 or newer for python 3.11. Use Pandas 2.1.1 or newer for python 3.12. Use Pandas 2.2.3 or newer for python 3.13. Use Pandas 2.3.3 or newer for python 3.14
+* Use Python 3.9 or newer
+* Use Pandas 1.5.0 or newer. pandas 1.5.x and 2.0.x need `numpy<2`
 * Use [zoneinfo](https://docs.python.org/3/library/zoneinfo.html), not pytz for handling time zone information
 
 ### Example of migrating an existing script
