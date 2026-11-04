@@ -22,6 +22,7 @@ TIMEOUT = 300      # Default timeout for web calls, in seconds.
 API_URLBASE = 'https://data-forecasts.volue.com'
 AUTH_URLBASE = 'https://auth.volueinsight.com'
 VOLUE_IDENTITY_AUTH_URLBASE = 'https://auth.identity.volue.com'
+RETIRED_API_HOSTS = ('api.volueinsight.com', 'api.wattsight.com')
 
 DEFAULT_AUTH_URLBASES = {
     AuthType.OAUTH: AUTH_URLBASE,
@@ -150,6 +151,10 @@ class Session(object):
                 raise ConfigException('Configuration file with name {} '
                                       'was not found.'.format(config_file))
         urlbase = config.get('common', 'urlbase', fallback=None)
+        if urlbase and urlparse(urlbase).hostname in RETIRED_API_HOSTS:
+            raise ConfigException(
+                'urlbase {} in the config file uses a retired host. Remove urlbase '
+                'from your config file, or set it to {}.'.format(urlbase, API_URLBASE))
         if urlbase is not None:
             self.urlbase = urlbase
         auth_type = config.get('common', 'auth_type')

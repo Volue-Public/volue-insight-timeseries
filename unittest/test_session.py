@@ -213,17 +213,37 @@ class _SubSession(vit.Session):
 
 @pytest.mark.parametrize('make_session', [
     lambda: vit.Session(urlbase=RETIRED_URLBASE),
-    lambda: vit.Session(config_file=_retired_config()),
-    lambda: vit.Session().read_config_file(_retired_config()),
     lambda: _set_urlbase(vit.Session()),
     lambda: _SubSession(config_file='unused.ini'),
-], ids=['param', 'config_file', 'read_config_file', 'direct_set', 'subclass'])
+], ids=['param', 'direct_set', 'subclass'])
 def test_retired_urlbase__warns(make_session):
     with requests_mock.Mocker() as m, \
             pytest.warns(FutureWarning, match='api.volueinsight.com') as record:
         m.post(requests_mock.ANY, text=OAUTH_TOKEN)
         make_session()
     assert len(record) == 1
+
+
+@pytest.mark.parametrize('host', ['api.volueinsight.com', 'api.wattsight.com'])
+@pytest.mark.parametrize('make_session', [
+    lambda config: vit.Session(config_file=config),
+    lambda config: vit.Session().read_config_file(config),
+], ids=['config_file', 'read_config_file'])
+def test_retired_urlbase_in_config_file__raises(make_session, host):
+    config = io.StringIO('[common]\nurlbase = https://{}/\nauth_type = OAuth\n'
+                         '[OAuth]\nid = clientid\nsecret = verysecret\n'.format(host))
+    with requests_mock.Mocker() as m, \
+            pytest.raises(vit.session.ConfigException, match=host):
+        make_session(config)
+    assert not m.called
+
+
+def test_retired_urlbase_in_config_file__session_unconfigured():
+    s = vit.Session()
+    with pytest.raises(vit.session.ConfigException):
+        s.read_config_file(_retired_config())
+    assert s.urlbase == vit.session.API_URLBASE
+    assert s.auth is None
 
 
 @pytest.mark.parametrize('host', [
