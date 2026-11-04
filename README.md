@@ -7,7 +7,9 @@ is based on having a valid Volue Data & Forecasts account. To get a trial accoun
 use the "Get in touch" form at https://www.volue.com/data-and-forecasts.
 
 The library supports Python 3.9 or newer and pandas 1.5.0 or newer. It is tested
-against Python 3.9, 3.10, 3.11, 3.12, 3.13 and 3.14.
+against Python 3.9, 3.10, 3.11, 3.12, 3.13 and 3.14. We support as many Python
+versions as we can, and drop one only in a new major version. See
+[Supported Python versions](https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/getting-started/installation#supported-python-versions).
 
 
 ## Documentation
