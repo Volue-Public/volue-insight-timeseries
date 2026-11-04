@@ -26,6 +26,10 @@ with open(os.path.join(here, 'volue_insight_timeseries/VERSION')) as fv:
 
 setup(
     name='volue_insight_timeseries',
+    # Supported Python versions policy:
+    # https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/getting-started/installation#supported-python-versions
+    # No upper cap: a cap makes pip on a newer Python fall back to an old release.
+    # Raising the minimum drops users on that version, so it needs a major release.
     python_requires='>=3.9',
     packages=find_packages(),
     install_requires=extract_requirements('requirements.txt'),
@@ -43,5 +47,16 @@ setup(
     package_data={'volue_insight_timeseries': ['VERSION']},
     author='Volue Data & Forecasts',
     author_email='df.support@volue.com',
-    url='https://www.volue.com/data-and-forecasts'
+    url='https://www.volue.com/data-and-forecasts',
+    # Tested Python versions: keep in line with .github/workflows/unittests.yml
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
+    ],
 )
