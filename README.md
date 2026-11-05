@@ -2,11 +2,9 @@
 
 Python library for the Volue Data & Forecasts Timeseries API.
 
-```bash
-pip install volue-insight-timeseries
-```
-
 **Documentation:** https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/
+
+**Installation:** https://docs.volue.com/data-and-forecasts/volue-insight-timeseries/getting-started/installation
 
 You need a Volue Data & Forecasts account. To get a trial account, use the "Get in touch"
 form at https://www.volue.com/data-and-forecasts.
