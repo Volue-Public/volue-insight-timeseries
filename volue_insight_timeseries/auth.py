@@ -6,6 +6,7 @@ import json
 import time
 import threading
 import os
+from enum import Enum
 
 try:
     from urllib.parse import urljoin
@@ -17,11 +18,30 @@ class AuthFailedException(Exception):
     pass
 
 
+class AuthType(str, Enum):
+    """
+    Supported values for ``auth_type``.
+    Behaves like ``enum.StrEnum``, which is not available in Python 3.10.
+    """
+
+    OAUTH = 'OAuth'
+    VOLUE_IDENTITY = 'VolueIdentity'
+
+    def __str__(self):
+        return self.value
+
+
 class OAuth:
     """
     Authentication based on OAuth client ID.
     This is the main authentication mechanism for customer access to the data center.
     """
+
+    auth_type = AuthType.OAUTH
+    token_path = '/oauth2/token'
+    scope = None
+    mismatch_hint = ('Check that the client ID and secret are your Volue Data & Forecasts credentials. '
+                     'If they are Volue Identity credentials, set auth_type = VolueIdentity.')
 
     def __init__(self, session, client_id, client_secret, auth_urlbase):
         self.client_id = client_id
@@ -46,17 +66,39 @@ class OAuth:
         self.token_type = None
         self.valid_until = None
         now = time.time()
-        url = urljoin(self.auth_urlbase, '/oauth2/token')
+        url = urljoin(self.auth_urlbase, self.token_path)
         auth = (self.client_id, self.client_secret)
         data = {'grant_type': 'client_credentials'}
+        if self.scope is not None:
+            data['scope'] = self.scope
         response = self.session.send_data_request('POST', self.auth_urlbase, url, rawdata=data, authval=auth)
         if response.status_code != 200:
-            raise AuthFailedException('Authentication failed: {}'.format(response.content))
+            raise AuthFailedException(self._failure_message(url, response))
         # Parse token
         rsp = json.loads(response.content.decode())
         self.token = rsp['access_token']
         self.token_type = rsp['token_type']
         self.valid_until = now + int(rsp['expires_in'] * 0.95)
+
+    def _failure_message(self, url, response):
+        """Explain a failed token request, so it is not mistaken for an API error"""
+        message = 'Authentication failed ({}) when requesting a token from {}'.format(self.auth_type, url)
+        error = None
+        try:
+            body = json.loads(response.content.decode())
+            error = body.get('error')
+            message += ': {}'.format(error)
+            if body.get('error_description'):
+                message += ' ({})'.format(body['error_description'])
+        except (ValueError, AttributeError):
+            message += ': HTTP {} {}'.format(response.status_code, response.content)
+        if error == 'invalid_client':
+            message += '. ' + self.mismatch_hint + ' The credentials may also have been revoked or have expired.'
+        elif error == 'invalid_scope':
+            message += '. The client is not allowed to access the Volue Data & Forecasts API. Contact support.'
+        elif response.status_code == 404:
+            message += '. Check that auth_type and auth_urlbase belong together.'
+        return message
 
     def get_headers(self, data):
         """The web-token auth header is simple"""
@@ -69,3 +111,15 @@ class OAuth:
             headers['X-Model-Name'] = wapi_request_source
             
         return headers
+
+
+class VolueIdentity(OAuth):
+    """
+    Authentication with a Volue Identity client ID (client credentials).
+    """
+
+    auth_type = AuthType.VOLUE_IDENTITY
+    token_path = '/connect/token'
+    scope = 'in.dnf:api'
+    mismatch_hint = ('Check that the client ID and secret are your Volue Identity credentials. '
+                     'If they are your existing Volue Data & Forecasts credentials, set auth_type = OAuth.')

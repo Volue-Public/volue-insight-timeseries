@@ -1,3 +1,4 @@
 requests>=2.18
+urllib3>=1.26
 sseclient-py>=1.7
-pandas>=1.5.0
+python-dateutil

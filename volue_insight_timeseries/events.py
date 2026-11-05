@@ -24,7 +24,7 @@ class EventListener:
         args = [util.make_arg('id', ids)]
         if start_time is not None:
             args.append(util.make_arg('start_time', start_time))
-        self.url = '/api/events?{}'.format('&'.join(args))
+        self.url = '/api/v1/timeseries/events?{}'.format('&'.join(args))
         self.session = session
         self.timeout = timeout
         self.retry = 3000 # Retry time in milliseconds
