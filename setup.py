@@ -33,6 +33,9 @@ setup(
     python_requires='>=3.9',
     packages=find_packages(),
     install_requires=extract_requirements('requirements.txt'),
+    extras_require={
+        'pandas': ['pandas>=1.5.0'],
+    },
     tests_require=[
         'pytest',
         'pytest-cov >= 2.5',
