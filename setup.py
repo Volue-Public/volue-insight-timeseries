@@ -47,6 +47,7 @@ setup(
     ),
     package_data={'volue_insight_timeseries': ['VERSION']},
     author='Volue Data & Forecasts',
+    license='MIT',
     author_email='df.support@volue.com',
     url='https://www.volue.com/data-and-forecasts',
     # Tested Python versions: keep in line with .github/workflows/unittests.yml
