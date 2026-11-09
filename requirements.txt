@@ -1,4 +1,4 @@
-requests>=2.18
-urllib3>=1.26
-sseclient-py>=1.7
+requests>=2.34.2
+urllib3>=2.8.0
+sseclient-py>=1.9.0
 python-dateutil
